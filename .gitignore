@@ -1,0 +1,16 @@
+# AI agent transient files
+.ai/a2a/
+.ai/checkpoints/
+
+# Experiments can get messy
+experiments/**/*.log
+experiments/**/*.tmp
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor swap files
+*.swp
+*.swo
+*~
