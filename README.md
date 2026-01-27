@@ -5,29 +5,32 @@ A personal workspace for learning and collecting engineering tools. Currently fo
 ## Quick Start
 
 ```bash
-# Browse learning notes
-ls notes/
+# Browse projects
+ls projects/
 
-# Check out configurations
-ls configs/
+# Check a specific project
+ls projects/neovim/
 
-# Find cheatsheets and references
-ls references/
+# Find shared resources
+ls shared/
 ```
 
 ## Structure
 
 ```
-configs/       # Dotfiles and tool configurations
-notes/         # Learning notes by topic
-scripts/       # Utility scripts
-experiments/   # Temporary explorations
-references/    # Cheatsheets, links, external resources
+projects/      # Self-contained tools and workflows
+  neovim/      #   NeoVim setup and learning
+  tmux/        #   tmux configuration and workflow
+shared/        # Cross-project resources
+  scripts/     #   Utilities useful across projects
+  references/  #   Cheatsheets, links, external resources
+  notes/       #   General learning notes
+experiments/   # Throwaway explorations
 ```
 
-## Current Learning Topics
+## Current Projects
 
-- **NeoVim** - Modal editing, configuration, plugins
+- **neovim** - Modal editing, configuration, plugins
 - **tmux** - Terminal multiplexing, session management
 
 ## For AI Agents
