@@ -85,6 +85,8 @@ Includes both defaults being learned and deliberate overrides.
 | `<leader>fb` | Find buffers | Telescope |
 | `<leader>fr` | Find references | Telescope + LSP |
 | `<leader>gb` | Toggle git blame | Gitsigns |
+| `<leader>mr` | Toggle markdown render | In-buffer prettification |
+| `<leader>mp` | Toggle markdown preview | Opens in browser (headings, mermaid) |
 | `<Esc>` | Clear search highlight | In normal mode |
 
 ---

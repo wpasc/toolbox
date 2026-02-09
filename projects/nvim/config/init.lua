@@ -153,13 +153,31 @@ require("lazy").setup({
   -- Syntax highlighting (treesitter)
   {
     "nvim-treesitter/nvim-treesitter",
+    lazy = false,
     build = ":TSUpdate",
     config = function()
-      require("nvim-treesitter.configs").setup({
-        ensure_installed = { "lua", "python", "javascript", "typescript", "markdown", "json", "yaml" },
-        highlight = { enable = true },
-        indent = { enable = true },
-      })
+      require("nvim-treesitter").install({ "lua", "python", "javascript", "typescript", "markdown", "json", "yaml" })
+    end,
+  },
+
+  -- Markdown rendering (inline in buffer)
+  {
+    "MeanderingProgrammer/render-markdown.nvim",
+    ft = { "markdown" },
+    dependencies = { "nvim-treesitter/nvim-treesitter", "nvim-tree/nvim-web-devicons" },
+    config = function()
+      require("render-markdown").setup({})
+      vim.keymap.set("n", "<leader>mr", "<cmd>RenderMarkdown toggle<CR>", { desc = "Toggle markdown render" })
+    end,
+  },
+
+  -- Markdown preview in browser (full render with heading sizes, mermaid, etc.)
+  {
+    "iamcco/markdown-preview.nvim",
+    ft = { "markdown" },
+    build = "cd app && npm install",
+    config = function()
+      vim.keymap.set("n", "<leader>mp", "<cmd>MarkdownPreviewToggle<CR>", { desc = "Toggle markdown preview (browser)" })
     end,
   },
 
