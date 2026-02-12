@@ -13,9 +13,8 @@ vim.g.maplocalleader = " "
 -- CORE OPTIONS
 -- =============================================================================
 
--- Line numbers (absolute + relative for easy jump counting)
+-- Line numbers
 vim.opt.number = true
-vim.opt.relativenumber = true
 
 -- Indentation (adjust per project as needed)
 vim.opt.tabstop = 4
@@ -84,16 +83,17 @@ vim.opt.rtp:prepend(lazypath)
 -- PLUGINS
 -- =============================================================================
 require("lazy").setup({
-  -- Colorscheme (VS Code-like dark theme)
+  -- Colorscheme (VS Code Default Dark Modern)
   {
-    "Mofiqul/vscode.nvim",
+    "gmr458/vscode_modern_theme.nvim",
     lazy = false,
     priority = 1000,
     config = function()
-      require("vscode").setup({
-        style = "dark",
+      require("vscode_modern").setup({
+        cursorline = true,
+        transparent_background = false,
       })
-      vim.cmd.colorscheme("vscode")
+      vim.cmd.colorscheme("vscode_modern")
     end,
   },
 
@@ -125,13 +125,23 @@ require("lazy").setup({
     end,
   },
 
+  -- Diff viewer (PR-style side-by-side diffs)
+  {
+    "sindrets/diffview.nvim",
+    config = function()
+      vim.keymap.set("n", "<leader>gd", "<cmd>DiffviewOpen<CR>", { desc = "Open diff view (vs index)" })
+      vim.keymap.set("n", "<leader>gh", "<cmd>DiffviewFileHistory %<CR>", { desc = "File git history" })
+      vim.keymap.set("n", "<leader>gq", "<cmd>DiffviewClose<CR>", { desc = "Close diff view" })
+    end,
+  },
+
   -- Status line (minimal, informative)
   {
     "nvim-lualine/lualine.nvim",
     dependencies = { "nvim-tree/nvim-web-devicons" },
     config = function()
       require("lualine").setup({
-        options = { theme = "vscode" },
+        options = { theme = "auto" },
       })
     end,
   },

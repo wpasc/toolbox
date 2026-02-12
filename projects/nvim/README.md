@@ -25,7 +25,7 @@ Run `make setup` from the repo root, or manually:
 - [x] Colorscheme (VS Code dark theme)
 - [x] Fuzzy finder (telescope)
 - [x] Syntax highlighting (treesitter)
-- [x] Git blame integration (gitsigns)
+- [x] Git integration (gitsigns + diffview)
 - [x] Status line (lualine)
 - [x] Markdown rendering — inline (`<leader>mr`) and browser preview (`<leader>mp`)
 - [ ] Python LSP support
