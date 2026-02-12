@@ -1,8 +1,9 @@
 # toolbox setup
-# Usage: make setup    (full install from scratch)
-#        make link     (symlink configs only)
-#        make brew     (install packages only)
-#        make status   (show what's installed and linked)
+# Usage: make setup         (full install from scratch — macOS with brew)
+#        make setup-remote  (remote Linux — no brew, no sudo, no npm)
+#        make link          (symlink configs only)
+#        make brew          (install packages only)
+#        make status        (show what's installed and linked)
 
 SHELL := /bin/bash
 TOOLBOX_DIR := $(shell pwd)
@@ -21,7 +22,7 @@ SYMLINKS := \
 
 # ─── Targets ──────────────────────────────────────────────────────────────────
 
-.PHONY: setup brew link nvim-plugins status clean help
+.PHONY: setup setup-remote install-nvim-remote brew link nvim-plugins status clean help
 
 ## Full setup from scratch
 setup: brew link nvim-plugins
@@ -33,6 +34,37 @@ setup: brew link nvim-plugins
 	@echo "  2. Restart your terminal"
 	@echo "  3. Run: tmux new -s main"
 	@echo "  4. Run: nvim"
+
+## Setup for remote Linux machines (no brew, no sudo, no npm)
+setup-remote: install-nvim-remote link nvim-plugins
+	@echo ""
+	@echo "✅ Remote setup complete!"
+	@echo ""
+	@echo "Next steps:"
+	@echo "  1. Ensure ~/.local/bin is in your PATH:"
+	@echo "     echo 'export PATH=\"\$$HOME/.local/bin:\$$PATH\"' >> ~/.bashrc"
+	@echo "  2. Restart your shell or: source ~/.bashrc"
+	@echo "  3. Run: tmux new -s main"
+	@echo "  4. Run: nvim"
+	@echo ""
+	@echo "Note: markdown-preview (browser) is skipped without npm."
+	@echo "      render-markdown (in-buffer) works without it."
+
+## Install neovim on Linux without a package manager
+install-nvim-remote:
+	@echo "── Installing neovim ──"
+	@mkdir -p $(HOME)/.local/bin $(HOME)/.local/share
+	@if command -v nvim >/dev/null 2>&1; then \
+		echo "  nvim already available: $$(nvim --version | head -1)"; \
+		echo "  (remove it or adjust PATH to reinstall)"; \
+	else \
+		echo "  Downloading nvim..."; \
+		curl -Lo /tmp/nvim.tar.gz https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.tar.gz; \
+		tar xzf /tmp/nvim.tar.gz -C $(HOME)/.local/share; \
+		ln -sf $(HOME)/.local/share/nvim-linux-x86_64/bin/nvim $(HOME)/.local/bin/nvim; \
+		rm /tmp/nvim.tar.gz; \
+		echo "  Installed to ~/.local/bin/nvim"; \
+	fi
 
 ## Install brew packages and casks
 brew:
