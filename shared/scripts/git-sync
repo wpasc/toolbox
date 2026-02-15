@@ -18,10 +18,6 @@
 #     Then it works as both `git-sync` and `git sync` (git auto-discovers
 #     commands named git-<foo> on PATH as subcommands).
 #
-#   Option B - Alias:
-#     Add this to your .zshrc:
-#       alias gsync="$HOME/workspace/toolbox/shared/scripts/git-sync"
-#
 # Dependencies: git
 
 set -euo pipefail
