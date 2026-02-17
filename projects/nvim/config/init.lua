@@ -97,19 +97,43 @@ require("lazy").setup({
     end,
   },
 
-  -- File explorer (like VS Code sidebar)
+  -- Keymap popup (press <leader> and wait to see available bindings)
   {
-    "nvim-tree/nvim-tree.lua",
-    dependencies = { "nvim-tree/nvim-web-devicons" },
+    "folke/which-key.nvim",
+    event = "VeryLazy",
     config = function()
-      require("nvim-tree").setup({
-        view = { width = 35 },
-        renderer = { icons = { show = { git = true } } },
+      local wk = require("which-key")
+      wk.setup({
+        delay = 300, -- ms before popup appears
       })
-      -- Toggle file explorer with leader+e
-      vim.keymap.set("n", "<leader>e", "<cmd>NvimTreeToggle<CR>", { desc = "Toggle file explorer" })
-      -- Focus file explorer with leader+o
-      vim.keymap.set("n", "<leader>o", "<cmd>NvimTreeFocus<CR>", { desc = "Focus file explorer" })
+      -- Label groups so the popup shows "+find", "+git", etc.
+      wk.add({
+        { "<leader>f", group = "find" },
+        { "<leader>g", group = "git" },
+        { "<leader>m", group = "markdown" },
+      })
+    end,
+  },
+
+  -- File explorer (neo-tree)
+  {
+    "nvim-neo-tree/neo-tree.nvim",
+    branch = "v3.x",
+    dependencies = {
+      "nvim-lua/plenary.nvim",
+      "nvim-tree/nvim-web-devicons",
+      "MunifTanjim/nui.nvim",
+    },
+    config = function()
+      require("neo-tree").setup({
+        window = { width = 35 },
+        filesystem = {
+          follow_current_file = { enabled = true },
+          filtered_items = { visible = true },
+        },
+      })
+      vim.keymap.set("n", "<leader>e", "<cmd>Neotree toggle<CR>", { desc = "Toggle file explorer" })
+      vim.keymap.set("n", "<leader>o", "<cmd>Neotree focus<CR>", { desc = "Focus file explorer" })
     end,
   },
 
@@ -164,8 +188,7 @@ require("lazy").setup({
   {
     "nvim-treesitter/nvim-treesitter",
     lazy = false,
-    build = ":TSUpdate",
-    config = function()
+    build = function()
       require("nvim-treesitter").install({ "lua", "python", "javascript", "typescript", "markdown", "json", "yaml" })
     end,
   },
