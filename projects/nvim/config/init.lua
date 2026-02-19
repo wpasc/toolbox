@@ -44,6 +44,12 @@ vim.opt.clipboard = "unnamedplus"
 -- Undo persistence (keep undo history across sessions)
 vim.opt.undofile = true
 
+-- Folding (nvim-ufo needs these)
+vim.opt.foldcolumn = "1"     -- show fold indicators in gutter
+vim.opt.foldlevel = 99       -- start with all folds open
+vim.opt.foldlevelstart = 99  -- start with all folds open for new buffers
+vim.opt.foldenable = true
+
 -- =============================================================================
 -- KEYMAPS - OVERRIDES WITH CLEAR RATIONALE
 -- =============================================================================
@@ -67,6 +73,9 @@ vim.keymap.set("n", "N", "Nzzzv", { desc = "Previous search result, centered" })
 
 -- Clear search highlight with Escape
 vim.keymap.set("n", "<Esc>", "<cmd>nohlsearch<CR>", { desc = "Clear search highlight" })
+
+-- Exit insert mode with jk (home row, no modifier needed)
+vim.keymap.set("i", "jk", "<Esc>", { desc = "Exit insert mode" })
 
 -- =============================================================================
 -- PLUGIN MANAGER (lazy.nvim)
@@ -122,6 +131,13 @@ require("lazy").setup({
       -- Vim builtins cheat sheet (add bindings here as you learn them)
       -- These don't change behavior, just add descriptions to which-key
       wk.add({
+        -- Folding
+        { "za", desc = "Toggle fold under cursor" },
+        { "zo", desc = "Open fold under cursor" },
+        { "zc", desc = "Close fold under cursor" },
+        { "zR", desc = "Open all folds (ufo)" },
+        { "zM", desc = "Close all folds (ufo)" },
+        { "zK", desc = "Peek inside fold (ufo)" },
         -- Navigation
         { "gg", desc = "Go to first line" },
         { "G", desc = "Go to last line" },
@@ -247,6 +263,25 @@ require("lazy").setup({
     end,
   },
 
+  -- Folding (nvim-ufo: async folds with preview, powered by treesitter)
+  {
+    "kevinhwang91/nvim-ufo",
+    dependencies = { "kevinhwang91/promise-async" },
+    config = function()
+      require("ufo").setup({
+        provider_selector = function(bufnr, filetype, buftype)
+          return { "treesitter", "indent" } -- treesitter first, indent as fallback
+        end,
+      })
+      -- Override default fold commands with ufo versions
+      vim.keymap.set("n", "zR", require("ufo").openAllFolds, { desc = "Open all folds" })
+      vim.keymap.set("n", "zM", require("ufo").closeAllFolds, { desc = "Close all folds" })
+      vim.keymap.set("n", "zK", function()
+        require("ufo").peekFoldedLinesUnderCursor()
+      end, { desc = "Peek inside fold" })
+    end,
+  },
+
   -- =============================================================================
   -- LSP + COMPLETION (Python support, etc.) - PLACEHOLDER
   -- =============================================================================
@@ -289,7 +324,4 @@ require("lazy").setup({
 --   mappings are safe to add without conflicting with Vim builtins.
 --
 -- Better way to leave insert mode:
---   Esc works but is a long reach. Common alternatives:
---   - jk or jj (type fast to exit insert mode)
---   - Caps Lock remapped to Esc (OS-level, not Vim)
---   - <C-[> (built-in Esc alias, already works)
+--   Using jk (configured above). Also: <C-[> is a built-in Esc alias.
