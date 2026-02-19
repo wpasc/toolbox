@@ -55,6 +55,12 @@ vim.opt.undofile = true
 -- vim.keymap.set("n", "<C-j>", "<C-d>zz", { desc = "Half-page down, centered" })
 -- vim.keymap.set("n", "<C-k>", "<C-u>zz", { desc = "Half-page up, centered" })
 
+-- H/L for start/end of line (more ergonomic than ^/$)
+-- Originals (top/bottom of screen) are rarely used; these compose with operators:
+-- dL = delete to end of line, yH = yank to start, vL = select to end, etc.
+vim.keymap.set({ "n", "v" }, "H", "^", { desc = "Start of line (first non-blank)" })
+vim.keymap.set({ "n", "v" }, "L", "$", { desc = "End of line" })
+
 -- Keep search results centered
 vim.keymap.set("n", "n", "nzzzv", { desc = "Next search result, centered" })
 vim.keymap.set("n", "N", "Nzzzv", { desc = "Previous search result, centered" })
@@ -111,6 +117,33 @@ require("lazy").setup({
         { "<leader>f", group = "find" },
         { "<leader>g", group = "git" },
         { "<leader>m", group = "markdown" },
+      })
+
+      -- Vim builtins cheat sheet (add bindings here as you learn them)
+      -- These don't change behavior, just add descriptions to which-key
+      wk.add({
+        -- Navigation
+        { "gg", desc = "Go to first line" },
+        { "G", desc = "Go to last line" },
+        { "%", desc = "Jump to matching bracket" },
+        { "{", desc = "Previous blank line" },
+        { "}", desc = "Next blank line" },
+        { "<C-d>", desc = "Half-page down" },
+        { "<C-u>", desc = "Half-page up" },
+        { "<C-o>", desc = "Jump back (older)" },
+        { "<C-i>", desc = "Jump forward (newer)" },
+        -- Editing
+        { "ciw", desc = "Change inner word" },
+        { "diw", desc = "Delete inner word" },
+        { "yiw", desc = "Yank (copy) inner word" },
+        { "ci\"", desc = "Change inside quotes" },
+        { "da{", desc = "Delete around braces" },
+        { ">>", desc = "Indent line" },
+        { "<<", desc = "Unindent line" },
+        { "~", desc = "Toggle case" },
+        { ".", desc = "Repeat last change" },
+        { "u", desc = "Undo" },
+        { "<C-r>", desc = "Redo" },
       })
     end,
   },
@@ -246,3 +279,17 @@ require("lazy").setup({
 --
 -- Quick save:
 -- vim.keymap.set("n", "<leader>w", "<cmd>w<CR>", { desc = "Save file" })
+--
+-- =============================================================================
+-- IDEAS TO EXPLORE
+-- =============================================================================
+-- Consistent insert/normal mode navigation:
+--   Some keys (like Ctrl-a/Ctrl-e for line start/end) could work in both modes
+--   to reduce the mental overhead of switching. Investigate what insert-mode
+--   mappings are safe to add without conflicting with Vim builtins.
+--
+-- Better way to leave insert mode:
+--   Esc works but is a long reach. Common alternatives:
+--   - jk or jj (type fast to exit insert mode)
+--   - Caps Lock remapped to Esc (OS-level, not Vim)
+--   - <C-[> (built-in Esc alias, already works)
