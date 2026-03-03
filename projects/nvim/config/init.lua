@@ -83,6 +83,78 @@ vim.keymap.set("n", "<Esc>", "<cmd>nohlsearch<CR>", { desc = "Clear search highl
 vim.keymap.set("i", "jk", "<Esc>", { desc = "Exit insert mode" })
 
 -- =============================================================================
+-- CHEAT SHEET (floating window with custom overrides and leader bindings)
+-- =============================================================================
+local function show_cheatsheet()
+  local lines = {
+    "  CUSTOM OVERRIDES                          ",
+    "  ──────────────────────────────────────────",
+    "  H          Start of line (replaces ^)     ",
+    "  L          End of line (replaces $)       ",
+    "  J          Half-page down, centered       ",
+    "  K          Half-page up, centered         ",
+    "  jk         Exit insert mode               ",
+    "  n / N      Next/prev search, centered     ",
+    "  <Esc>      Clear search highlight          ",
+    "",
+    "  LEADER BINDINGS  (<leader> = Space)       ",
+    "  ──────────────────────────────────────────",
+    "  <leader>?    This cheat sheet             ",
+    "  <leader>e    Toggle file explorer         ",
+    "  <leader>o    Focus file explorer          ",
+    "",
+    "  <leader>ff   Find files                   ",
+    "  <leader>fg   Live grep                    ",
+    "  <leader>fb   Find buffers                 ",
+    "  <leader>fr   Find references (LSP)        ",
+    "",
+    "  <leader>gb   Toggle git blame             ",
+    "  <leader>gd   Diff view (vs index)         ",
+    "  <leader>gm   Diff vs main (PR view)       ",
+    "  <leader>gh   File git history             ",
+    "  <leader>gq   Close diff view              ",
+    "",
+    "  <leader>mr   Toggle markdown render       ",
+    "  <leader>mp   Toggle markdown preview      ",
+    "",
+    "  Press q or <Esc> to close                 ",
+  }
+
+  local buf = vim.api.nvim_create_buf(false, true)
+  vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
+  vim.bo[buf].modifiable = false
+  vim.bo[buf].bufhidden = "wipe"
+
+  local width = 48
+  local height = #lines
+  local ui = vim.api.nvim_list_uis()[1]
+  local row = math.floor((ui.height - height) / 2)
+  local col = math.floor((ui.width - width) / 2)
+
+  local win = vim.api.nvim_open_win(buf, true, {
+    relative = "editor",
+    width = width,
+    height = height,
+    row = row,
+    col = col,
+    style = "minimal",
+    border = "rounded",
+    title = " Cheat Sheet ",
+    title_pos = "center",
+  })
+
+  local function close()
+    if vim.api.nvim_win_is_valid(win) then
+      vim.api.nvim_win_close(win, true)
+    end
+  end
+  vim.keymap.set("n", "q", close, { buffer = buf, nowait = true })
+  vim.keymap.set("n", "<Esc>", close, { buffer = buf, nowait = true })
+end
+
+vim.keymap.set("n", "<leader>?", show_cheatsheet, { desc = "Show cheat sheet" })
+
+-- =============================================================================
 -- PLUGIN MANAGER (lazy.nvim)
 -- =============================================================================
 -- Bootstrap lazy.nvim if not installed
@@ -128,6 +200,7 @@ require("lazy").setup({
       })
       -- Label groups so the popup shows "+find", "+git", etc.
       wk.add({
+        { "<leader>?", desc = "Show cheat sheet" },
         { "<leader>f", group = "find" },
         { "<leader>g", group = "git" },
         { "<leader>m", group = "markdown" },
@@ -208,6 +281,7 @@ require("lazy").setup({
     "sindrets/diffview.nvim",
     config = function()
       vim.keymap.set("n", "<leader>gd", "<cmd>DiffviewOpen<CR>", { desc = "Open diff view (vs index)" })
+      vim.keymap.set("n", "<leader>gm", "<cmd>DiffviewOpen main<CR>", { desc = "Diff vs main (PR view)" })
       vim.keymap.set("n", "<leader>gh", "<cmd>DiffviewFileHistory %<CR>", { desc = "File git history" })
       vim.keymap.set("n", "<leader>gq", "<cmd>DiffviewClose<CR>", { desc = "Close diff view" })
     end,

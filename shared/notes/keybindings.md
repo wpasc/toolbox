@@ -85,8 +85,13 @@ Includes both defaults being learned and deliberate overrides.
 | `<leader>fb` | Find buffers | Telescope |
 | `<leader>fr` | Find references | Telescope + LSP |
 | `<leader>gb` | Toggle git blame | Gitsigns |
+| `<leader>gd` | Diff view (vs index) | Diffview |
+| `<leader>gm` | Diff vs main (PR view) | Diffview — cumulative changes like a PR |
+| `<leader>gh` | File git history | Diffview |
+| `<leader>gq` | Close diff view | Diffview |
 | `<leader>mr` | Toggle markdown render | In-buffer prettification |
 | `<leader>mp` | Toggle markdown preview | Opens in browser (headings, mermaid) |
+| `<leader>?` | Show cheat sheet | Floating window with all overrides + bindings |
 | `J` | Half-page down, centered | Overrides join lines (use `:join`) |
 | `K` | Half-page up, centered | Overrides keyword lookup |
 | `<Esc>` | Clear search highlight | In normal mode |
