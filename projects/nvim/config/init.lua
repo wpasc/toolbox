@@ -67,6 +67,11 @@ vim.opt.foldenable = true
 vim.keymap.set({ "n", "v" }, "H", "^", { desc = "Start of line (first non-blank)" })
 vim.keymap.set({ "n", "v" }, "L", "$", { desc = "End of line" })
 
+-- J/K for half-page scroll with centering (modifier key extends base j/k movement)
+-- Overrides: J (join lines — use :join instead), K (keyword lookup — rarely used)
+vim.keymap.set({ "n", "v" }, "J", "<C-d>zz", { desc = "Half-page down, centered" })
+vim.keymap.set({ "n", "v" }, "K", "<C-u>zz", { desc = "Half-page up, centered" })
+
 -- Keep search results centered
 vim.keymap.set("n", "n", "nzzzv", { desc = "Next search result, centered" })
 vim.keymap.set("n", "N", "Nzzzv", { desc = "Previous search result, centered" })

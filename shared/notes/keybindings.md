@@ -31,8 +31,8 @@ Includes both defaults being learned and deliberate overrides.
 | `gg` | Go to file start | |
 | `G` | Go to file end | |
 | `{` `}` | Previous/next paragraph | |
-| `C-d` | Half-page down | **Consider override to C-j** |
-| `C-u` | Half-page up | **Consider override to C-k** |
+| `C-d` | Half-page down | Also available as `J` (centered) |
+| `C-u` | Half-page up | Also available as `K` (centered) |
 
 ### Editing (DEFAULT)
 
@@ -87,6 +87,8 @@ Includes both defaults being learned and deliberate overrides.
 | `<leader>gb` | Toggle git blame | Gitsigns |
 | `<leader>mr` | Toggle markdown render | In-buffer prettification |
 | `<leader>mp` | Toggle markdown preview | Opens in browser (headings, mermaid) |
+| `J` | Half-page down, centered | Overrides join lines (use `:join`) |
+| `K` | Half-page up, centered | Overrides keyword lookup |
 | `<Esc>` | Clear search highlight | In normal mode |
 
 ---
@@ -160,6 +162,8 @@ Track what we've changed and why, so future-you understands the reasoning.
 | tmux | `"` split horizontal | `-` | Visual mnemonic, no shift key |
 | nvim | (none) | `<Esc>` clears highlight | Common need, intuitive key |
 | nvim | `n`/`N` | Added `zz` centering | Keep search result visible |
+| nvim | `J` join lines | Half-page down, centered | Shift extends base `j` movement; `:join` still available |
+| nvim | `K` keyword lookup | Half-page up, centered | Shift extends base `k` movement; rarely used default |
 
 ---
 
