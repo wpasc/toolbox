@@ -39,7 +39,22 @@ vim.opt.splitright = true -- Vertical splits open to the right
 vim.opt.splitbelow = true -- Horizontal splits open below
 
 -- Clipboard (use system clipboard)
+-- On remote machines there is no clipboard provider (no X11/Wayland/pbcopy).
+-- OSC 52 tunnels clipboard data through the SSH connection to the local terminal.
+-- Requires: Neovim 0.10+, and a terminal that supports OSC 52 (iTerm2 does).
+-- If using tmux, also add to tmux.conf: set -g set-clipboard on
 vim.opt.clipboard = "unnamedplus"
+vim.g.clipboard = {
+  name = "OSC 52",
+  copy = {
+    ["+"] = require("vim.ui.clipboard.osc52").copy("+"),
+    ["*"] = require("vim.ui.clipboard.osc52").copy("*"),
+  },
+  paste = {
+    ["+"] = require("vim.ui.clipboard.osc52").paste("+"),
+    ["*"] = require("vim.ui.clipboard.osc52").paste("*"),
+  },
+}
 
 -- Undo persistence (keep undo history across sessions)
 vim.opt.undofile = true
@@ -64,8 +79,8 @@ vim.opt.foldenable = true
 -- H/L for start/end of line (more ergonomic than ^/$)
 -- Originals (top/bottom of screen) are rarely used; these compose with operators:
 -- dL = delete to end of line, yH = yank to start, vL = select to end, etc.
-vim.keymap.set({ "n", "v" }, "H", "^", { desc = "Start of line (first non-blank)" })
-vim.keymap.set({ "n", "v" }, "L", "$", { desc = "End of line" })
+vim.keymap.set({ "n", "v", "o" }, "H", "^", { desc = "Start of line (first non-blank)" })
+vim.keymap.set({ "n", "v", "o" }, "L", "$", { desc = "End of line" })
 
 -- J/K for half-page scroll with centering (modifier key extends base j/k movement)
 -- Overrides: J (join lines — use :join instead), K (keyword lookup — rarely used)
