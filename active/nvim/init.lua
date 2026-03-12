@@ -140,6 +140,8 @@ local function show_cheatsheet()
     "  <leader>mr   Toggle markdown render       ",
     "  <leader>mp   Toggle markdown preview      ",
     "",
+    "  <leader>cc   CLI tool cheat sheets        ",
+    "",
     "  LSP (when language server attached)       ",
     "  ──────────────────────────────────────────",
     "  gd           Go to definition             ",
@@ -188,6 +190,28 @@ end
 vim.keymap.set("n", "<leader>?", show_cheatsheet, { desc = "Show cheat sheet" })
 
 -- =============================================================================
+-- CLI TOOL CHEAT SHEETS (markdown files opened via Telescope)
+-- =============================================================================
+-- Cheat sheets live in active/cli-tools/notes/ (sibling to this nvim config dir)
+-- Uses Telescope to pick a file, then opens it with render-markdown.nvim rendering
+local function get_cheatsheet_dir()
+  local config_dir = vim.fn.resolve(vim.fn.stdpath("config"))
+  return vim.fn.fnamemodify(config_dir, ":h") .. "/cli-tools/notes"
+end
+
+vim.keymap.set("n", "<leader>cc", function()
+  local dir = get_cheatsheet_dir()
+  if vim.fn.isdirectory(dir) == 0 then
+    vim.notify("Cheat sheets not found: " .. dir, vim.log.levels.WARN)
+    return
+  end
+  require("telescope.builtin").find_files({
+    prompt_title = "CLI Cheat Sheets",
+    cwd = dir,
+  })
+end, { desc = "CLI tool cheat sheets" })
+
+-- =============================================================================
 -- PLUGIN MANAGER (lazy.nvim)
 -- =============================================================================
 -- Bootstrap lazy.nvim if not installed
@@ -234,6 +258,7 @@ require("lazy").setup({
       -- Label groups so the popup shows "+find", "+git", etc.
       wk.add({
         { "<leader>?", desc = "Show cheat sheet" },
+        { "<leader>c", group = "cheatsheets" },
         { "<leader>f", group = "find" },
         { "<leader>g", group = "git" },
         { "<leader>m", group = "markdown" },
@@ -334,7 +359,7 @@ require("lazy").setup({
   -- Fuzzy finder (essential for navigation)
   {
     "nvim-telescope/telescope.nvim",
-    branch = "0.1.x",
+    branch = "master",
     dependencies = { "nvim-lua/plenary.nvim" },
     config = function()
       local builtin = require("telescope.builtin")
@@ -444,7 +469,9 @@ require("lazy").setup({
     end,
   },
 
-  -- LSP configuration
+  -- LSP configuration (vim.lsp.config API — requires Neovim 0.11+)
+  -- nvim-lspconfig provides default server configs (cmd, filetypes, root_dir);
+  -- we override with capabilities and enable via the native vim.lsp API.
   {
     "neovim/nvim-lspconfig",
     dependencies = {
@@ -452,19 +479,20 @@ require("lazy").setup({
       "hrsh7th/cmp-nvim-lsp",
     },
     config = function()
-      local lspconfig = require("lspconfig")
       local capabilities = require("cmp_nvim_lsp").default_capabilities()
 
       -- Pyright: type checking, go-to-definition, references, hover
       -- (Same engine as Pylance in VS Code/Cursor)
-      lspconfig.pyright.setup({
+      vim.lsp.config("pyright", {
         capabilities = capabilities,
       })
 
       -- Ruff: fast linting + formatting (replaces flake8, isort, black)
-      lspconfig.ruff.setup({
+      vim.lsp.config("ruff", {
         capabilities = capabilities,
       })
+
+      vim.lsp.enable({ "pyright", "ruff" })
 
       -- LSP keymaps (active only when a language server attaches)
       vim.api.nvim_create_autocmd("LspAttach", {

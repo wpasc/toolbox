@@ -10,7 +10,7 @@ TOOLBOX_DIR := $(shell pwd)
 
 # ─── What to install ──────────────────────────────────────────────────────────
 # Add new brew packages here as your setup evolves
-BREW_PACKAGES := neovim tmux
+BREW_PACKAGES := neovim tmux ripgrep fd bat git-delta fzf
 BREW_CASKS := font-jetbrains-mono-nerd-font
 
 # ─── What to symlink ─────────────────────────────────────────────────────────
@@ -25,10 +25,10 @@ CURSOR_USER_DIR := $(HOME)/Library/Application Support/Cursor/User
 
 # ─── Targets ──────────────────────────────────────────────────────────────────
 
-.PHONY: setup setup-remote install-nvim-remote brew link link-cursor nvim-plugins cursor-extensions cursor-extensions-install status clean help
+.PHONY: setup setup-remote install-nvim-remote brew link link-cursor nvim-plugins configure-cli-tools cursor-extensions cursor-extensions-install status clean help
 
 ## Full setup from scratch
-setup: brew link link-cursor nvim-plugins
+setup: brew link link-cursor nvim-plugins configure-cli-tools
 	@echo ""
 	@echo "✅ Setup complete!"
 	@echo ""
@@ -115,6 +115,33 @@ link-cursor:
 		ln -sf "$$src" "$$dst"; \
 	done
 
+## Configure CLI tools (delta as git pager, fzf shell integration)
+configure-cli-tools:
+	@echo "── Configuring CLI tools ──"
+	@if command -v delta >/dev/null 2>&1; then \
+		echo "  Configuring delta as git pager..."; \
+		git config --global core.pager delta; \
+		git config --global interactive.diffFilter "delta --color-only"; \
+		git config --global delta.navigate true; \
+		git config --global delta.dark true; \
+		git config --global delta.side-by-side true; \
+		git config --global delta.line-numbers true; \
+		git config --global delta.syntax-theme "Visual Studio Dark+"; \
+		git config --global merge.conflictstyle diff3; \
+		git config --global diff.colorMoved default; \
+		echo "  delta configured"; \
+	else \
+		echo "  delta not found, skipping"; \
+	fi
+	@if command -v fzf >/dev/null 2>&1; then \
+		echo "  fzf installed — add to your .zshrc:"; \
+		echo "    source <(fzf --zsh)"; \
+		echo "  Or for bash:"; \
+		echo "    eval \"\$$(fzf --bash)\""; \
+	else \
+		echo "  fzf not found, skipping"; \
+	fi
+
 ## Install nvim plugins (headless)
 nvim-plugins:
 	@echo "── Installing nvim plugins ──"
@@ -146,8 +173,10 @@ cursor-extensions-install:
 status:
 	@echo "── Brew packages ──"
 	@for pkg in $(BREW_PACKAGES); do \
-		if command -v "$$pkg" >/dev/null 2>&1; then \
-			echo "  ✅ $$pkg ($$($$pkg --version 2>/dev/null | head -1))"; \
+		bin=$$pkg; \
+		case $$pkg in ripgrep) bin=rg;; git-delta) bin=delta;; esac; \
+		if command -v "$$bin" >/dev/null 2>&1; then \
+			echo "  ✅ $$pkg ($$($$bin --version 2>/dev/null | head -1))"; \
 		else \
 			echo "  ❌ $$pkg (not installed)"; \
 		fi; \
