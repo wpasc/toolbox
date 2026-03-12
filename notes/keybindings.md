@@ -157,6 +157,35 @@ These work in your shell and many other places. Worth knowing.
 
 ---
 
+## Cursor
+
+### Overrides
+
+| Key | Action | Default replaced |
+|-----|--------|-----------------|
+| `Cmd+i` | Composer agent mode | -- |
+| `Cmd+Shift+d` | Go to definition | Focus debug panel |
+| `Cmd+Shift+r` | Find references | -- |
+
+### Cross-Editor Mental Model
+
+Same concepts, different access patterns per tool. Not trying to force
+`<leader>` = `Cmd` 1:1 (too many conflicts). Instead, learn each tool's
+natural bindings and align where it's free.
+
+| Action | NeoVim | Cursor |
+|--------|--------|--------|
+| Go to definition | `gd` | `Cmd+Shift+d` |
+| Find references | `gr` or `<leader>fr` | `Cmd+Shift+r` |
+| Find files | `<leader>ff` | `Cmd+p` |
+| Live grep | `<leader>fg` | `Cmd+Shift+f` |
+| Save | `<leader>w` | `Cmd+s` |
+| Rename symbol | `<leader>rn` | `F2` |
+| Code action | `<leader>ca` | `Cmd+.` |
+| Hover docs | `<leader>k` | mouse hover |
+
+---
+
 ## Overrides Log
 
 Track what we've changed and why, so future-you understands the reasoning.

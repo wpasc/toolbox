@@ -3,5 +3,15 @@
     {
         "key": "cmd+i",
         "command": "composerMode.agent"
+    },
+    {
+        "key": "shift+cmd+d",
+        "command": "editor.action.revealDefinition",
+        "when": "editorTextFocus"
+    },
+    {
+        "key": "shift+cmd+r",
+        "command": "references-view.findReferences",
+        "when": "editorTextFocus"
     }
 ]
