@@ -97,6 +97,11 @@ vim.keymap.set("n", "<Esc>", "<cmd>nohlsearch<CR>", { desc = "Clear search highl
 -- Exit insert mode with jk (home row, no modifier needed)
 vim.keymap.set("i", "jk", "<Esc>", { desc = "Exit insert mode" })
 
+-- Save / quit (no more :wq!)
+vim.keymap.set("n", "<leader>w", "<cmd>w<CR>", { desc = "Save file" })
+vim.keymap.set("n", "<leader>wq", "<cmd>wq<CR>", { desc = "Save and quit" })
+vim.keymap.set("n", "<leader>qq", "<cmd>q!<CR>", { desc = "Force quit" })
+
 -- =============================================================================
 -- CHEAT SHEET (floating window with custom overrides and leader bindings)
 -- =============================================================================
@@ -115,6 +120,9 @@ local function show_cheatsheet()
     "  LEADER BINDINGS  (<leader> = Space)       ",
     "  ──────────────────────────────────────────",
     "  <leader>?    This cheat sheet             ",
+    "  <leader>w    Save file                    ",
+    "  <leader>wq   Save and quit                ",
+    "  <leader>qq   Force quit                   ",
     "  <leader>e    Toggle file explorer         ",
     "  <leader>o    Focus file explorer          ",
     "",
@@ -131,6 +139,16 @@ local function show_cheatsheet()
     "",
     "  <leader>mr   Toggle markdown render       ",
     "  <leader>mp   Toggle markdown preview      ",
+    "",
+    "  LSP (when language server attached)       ",
+    "  ──────────────────────────────────────────",
+    "  gd           Go to definition             ",
+    "  gr           Go to references             ",
+    "  <leader>k    Hover docs                   ",
+    "  <leader>rn   Rename symbol                ",
+    "  <leader>ca   Code action                  ",
+    "  <leader>d    Show diagnostic              ",
+    "  [d / ]d      Prev/next diagnostic         ",
     "",
     "  Press q or <Esc> to close                 ",
   }
@@ -377,12 +395,100 @@ require("lazy").setup({
   },
 
   -- =============================================================================
-  -- LSP + COMPLETION (Python support, etc.) - PLACEHOLDER
+  -- LSP + COMPLETION (Python IDE features)
   -- =============================================================================
-  -- TODO: Add LSP config for Python (pyright or pylsp)
-  -- TODO: Add nvim-cmp for autocompletion
-  -- TODO: Add flake8/ruff integration
-  -- Keeping this minimal for now - add when ready to dive into LSP
+
+  -- Mason: auto-installs LSP servers and tools
+  {
+    "williamboman/mason.nvim",
+    config = function()
+      require("mason").setup()
+    end,
+  },
+
+  -- Bridge between mason and lspconfig (auto-setup installed servers)
+  {
+    "williamboman/mason-lspconfig.nvim",
+    dependencies = { "williamboman/mason.nvim" },
+    config = function()
+      require("mason-lspconfig").setup({
+        ensure_installed = { "pyright", "ruff" },
+      })
+    end,
+  },
+
+  -- Autocompletion
+  {
+    "hrsh7th/nvim-cmp",
+    dependencies = {
+      "hrsh7th/cmp-nvim-lsp",
+      "hrsh7th/cmp-buffer",
+      "hrsh7th/cmp-path",
+    },
+    config = function()
+      local cmp = require("cmp")
+      cmp.setup({
+        sources = cmp.config.sources({
+          { name = "nvim_lsp" },
+          { name = "buffer" },
+          { name = "path" },
+        }),
+        mapping = cmp.mapping.preset.insert({
+          ["<C-Space>"] = cmp.mapping.complete(),
+          ["<CR>"] = cmp.mapping.confirm({ select = true }),
+          ["<C-n>"] = cmp.mapping.select_next_item(),
+          ["<C-p>"] = cmp.mapping.select_prev_item(),
+          ["<C-e>"] = cmp.mapping.abort(),
+        }),
+      })
+    end,
+  },
+
+  -- LSP configuration
+  {
+    "neovim/nvim-lspconfig",
+    dependencies = {
+      "williamboman/mason-lspconfig.nvim",
+      "hrsh7th/cmp-nvim-lsp",
+    },
+    config = function()
+      local lspconfig = require("lspconfig")
+      local capabilities = require("cmp_nvim_lsp").default_capabilities()
+
+      -- Pyright: type checking, go-to-definition, references, hover
+      -- (Same engine as Pylance in VS Code/Cursor)
+      lspconfig.pyright.setup({
+        capabilities = capabilities,
+      })
+
+      -- Ruff: fast linting + formatting (replaces flake8, isort, black)
+      lspconfig.ruff.setup({
+        capabilities = capabilities,
+      })
+
+      -- LSP keymaps (active only when a language server attaches)
+      vim.api.nvim_create_autocmd("LspAttach", {
+        callback = function(event)
+          local opts = function(desc)
+            return { buffer = event.buf, desc = desc }
+          end
+          -- Navigation
+          vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts("Go to definition"))
+          vim.keymap.set("n", "gr", vim.lsp.buf.references, opts("Go to references"))
+          vim.keymap.set("n", "gD", vim.lsp.buf.declaration, opts("Go to declaration"))
+          vim.keymap.set("n", "gi", vim.lsp.buf.implementation, opts("Go to implementation"))
+          -- Info + refactoring
+          vim.keymap.set("n", "<leader>k", vim.lsp.buf.hover, opts("Hover documentation"))
+          vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, opts("Rename symbol"))
+          vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, opts("Code action"))
+          -- Diagnostics
+          vim.keymap.set("n", "[d", vim.diagnostic.goto_prev, opts("Previous diagnostic"))
+          vim.keymap.set("n", "]d", vim.diagnostic.goto_next, opts("Next diagnostic"))
+          vim.keymap.set("n", "<leader>d", vim.diagnostic.open_float, opts("Show diagnostic"))
+        end,
+      })
+    end,
+  },
 
   -- =============================================================================
   -- BOOKMARKS - PLACEHOLDER
@@ -396,6 +502,33 @@ require("lazy").setup({
 })
 
 -- =============================================================================
+-- DIAGNOSTICS (inline error display, like Cursor's squiggly lines)
+-- =============================================================================
+vim.diagnostic.config({
+  virtual_text = true,      -- Show error text at end of line
+  signs = true,             -- Show signs in the gutter
+  underline = true,         -- Underline problematic code
+  update_in_insert = false, -- Don't update while typing (less noisy)
+  severity_sort = true,     -- Show errors before warnings
+})
+
+-- =============================================================================
+-- FORMAT ON SAVE (Python only — ruff lint fixes + formatting)
+-- =============================================================================
+vim.api.nvim_create_autocmd("BufWritePre", {
+  pattern = "*.py",
+  callback = function()
+    -- Apply ruff lint fixes (unused imports, isort, etc.)
+    vim.lsp.buf.code_action({
+      context = { only = { "source.fixAll.ruff" }, diagnostics = {} },
+      apply = true,
+    })
+    -- Format with ruff
+    vim.lsp.buf.format({ async = false })
+  end,
+})
+
+-- =============================================================================
 -- FUTURE KEYMAPS TO CONSIDER
 -- =============================================================================
 -- These are commented out - uncomment and test as you learn what you need
@@ -406,8 +539,6 @@ require("lazy").setup({
 -- vim.keymap.set("n", "<C-k>", "<C-w>k", { desc = "Move to window above" })
 -- vim.keymap.set("n", "<C-l>", "<C-w>l", { desc = "Move to right window" })
 --
--- Quick save:
--- vim.keymap.set("n", "<leader>w", "<cmd>w<CR>", { desc = "Save file" })
 --
 -- =============================================================================
 -- IDEAS TO EXPLORE

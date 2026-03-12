@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-A personal workspace for learning, experimenting with, and collecting engineering tools. Current focus: NeoVim and tmux. This repo serves as both a learning journal and a place to store useful configurations, scripts, and reference materials.
+A personal workspace for learning, experimenting with, and collecting engineering tools. Current focus: NeoVim, tmux, and Cursor. This repo serves as both a learning journal and a place to store useful configurations, scripts, and reference materials.
 
 ## External Standards
 
@@ -30,36 +30,36 @@ Checkpoints in `.ai/checkpoints/` preserve session context for work continuation
 ## Content Organization
 
 ```
-projects/           # Self-contained tools and workflows
-  [project]/
-    config/         #   Dotfiles and configuration
-    notes/          #   Project-specific learning notes
-    scripts/        #   Project-specific utilities
-    README.md       #   Project overview and setup
-shared/             # Cross-project resources
-  scripts/          #   Utilities useful across projects
-  references/       #   Cheatsheets, links, external resources
-  notes/            #   General learning notes
-experiments/        # Throwaway explorations and trials
+active/             # Actively used tool configs + notes
+  [tool]/
+    [config files]  #   Dotfiles (no config/ subdirectory)
+    notes/          #   Tool-specific learning notes
+experimental/       # Tools under evaluation (not yet active)
+  [tool]/
+    notes/
+scripts/            # Standalone utility scripts
+notes/              # Cross-cutting learning notes
 ```
 
 ## Key Patterns
 
-- **Projects**: Self-contained in `projects/[name]/`. Each project has its own config, notes, and scripts.
-- **Notes**: Use markdown with clear headings. Date prefix optional.
-- **Configs**: Live in `projects/[tool]/config/`, mirror the actual dotfile structure
-- **Scripts**: Include a comment header explaining purpose and usage. Project-specific scripts go in the project; general utilities go in `shared/scripts/`.
+- **Active tools**: Self-contained in `active/[tool]/`. Config files sit at the tool root (no `config/` subdirectory). Notes go in `notes/` subdirectory.
+- **Experimental tools**: Not yet in daily use. Live in `experimental/[tool]/`.
+- **Notes**: Use markdown with clear headings. Tool-specific notes go in the tool directory; cross-cutting notes go in top-level `notes/`.
+- **Configs**: Live directly in `active/[tool]/`, symlinked to their expected system locations via Makefile.
+- **Scripts**: Include a comment header explaining purpose and usage. Live in top-level `scripts/`.
 
 ## Common Workflows
 
-- Adding a new project: Create `projects/[name]/` with `config/`, `notes/`, `scripts/` subdirs and a README
-- Adding project notes: Create in `projects/[project]/notes/` with descriptive filename
-- Adding shared notes: Create in `shared/notes/` for cross-project learning
-- Saving a config: Add to `projects/[tool]/config/`, document dependencies in the project README
-- Trying something new: Use `experiments/` freely - it's meant for mess
-- Finding info: Check project notes first, then `shared/`
+- Adding a new active tool: Create `active/[name]/` with config files and `notes/` subdir, add symlinks to Makefile
+- Promoting experimental to active: Move from `experimental/` to `active/`, add Makefile symlinks
+- Adding tool notes: Create in `active/[tool]/notes/` with descriptive filename
+- Adding cross-cutting notes: Create in `notes/` for things spanning multiple tools
+- Saving a config: Add to `active/[tool]/`, add symlink entry to Makefile
+- Trying something new: Use `experimental/` freely
 
 ## Current Focus
 
 - NeoVim: Setup, configuration, learning keybindings and plugins
 - tmux: Session management, configuration, workflow integration
+- Cursor: Settings tracking, extension management

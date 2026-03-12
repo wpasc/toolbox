@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# git-sync - Quick add/commit/pull/push for repos used like Dropbox
+# gs - Quick add/commit/pull/push for repos used like Dropbox
 #
-# Usage: git-sync [commit message]
+# Usage: gs [commit message]
 #   Default message is "sync" if none provided.
 #
 # Flow:
@@ -10,13 +10,9 @@
 #   3. git pull --rebase
 #   4. git push
 #
-# Setup (pick one):
-#
-#   Option A - Add to PATH (recommended):
-#     Add this to your .zshrc:
-#       export PATH="$HOME/workspace/toolbox/shared/scripts:$PATH"
-#     Then it works as both `git-sync` and `git sync` (git auto-discovers
-#     commands named git-<foo> on PATH as subcommands).
+# Setup:
+#   Add this to your .zshrc:
+#     export PATH="$HOME/workspace/toolbox/scripts:$PATH"
 #
 # Dependencies: git
 

@@ -1,11 +1,11 @@
 # toolbox
 
-A personal workspace for learning and collecting engineering tools. Currently focused on mastering NeoVim and tmux for a better terminal-based development workflow.
+A personal workspace for learning and collecting engineering tools. Currently focused on NeoVim, tmux, and Cursor.
 
 ## Quick Start
 
 ```bash
-# Full setup from scratch (brew packages, symlinks, nvim plugins)
+# Full setup from scratch (brew packages, symlinks, nvim plugins, cursor configs)
 make setup
 
 # Just check what's installed
@@ -17,21 +17,22 @@ See `make help` for all available targets.
 ## Structure
 
 ```
-Makefile       # One-command setup for new machines
-projects/      # Self-contained tools and workflows
-  nvim/        #   NeoVim setup and learning
-  tmux/        #   tmux configuration and workflow
-shared/        # Cross-project resources
-  scripts/     #   Utilities useful across projects
-  references/  #   Cheatsheets, links, external resources
-  notes/       #   General learning notes (incl. keybindings.md)
-experiments/   # Throwaway explorations
+Makefile         # One-command setup for new machines
+active/          # Actively used tool configs
+  nvim/          #   NeoVim config and learning
+  tmux/          #   tmux configuration
+  cursor/        #   Cursor settings and extensions
+experimental/    # Tools under evaluation
+  dictation/     #   Dictation tooling
+scripts/         # Standalone utilities (git-sync, etc.)
+notes/           # Cross-cutting learning notes
 ```
 
-## Current Projects
+## Active Tools
 
 - **nvim** - Modal editing, configuration, plugins
 - **tmux** - Terminal multiplexing, session management
+- **cursor** - AI-assisted editor, settings tracking
 
 ## For AI Agents
 

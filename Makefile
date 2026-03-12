@@ -16,16 +16,19 @@ BREW_CASKS := font-jetbrains-mono-nerd-font
 # ─── What to symlink ─────────────────────────────────────────────────────────
 # Format: source:target
 # Add new config symlinks here as you add tools
+# Note: Cursor symlinks handled separately (link-cursor) due to spaces in path
 SYMLINKS := \
-	projects/nvim/config:$(HOME)/.config/nvim \
-	projects/tmux/config/tmux.conf:$(HOME)/.tmux.conf
+	active/nvim:$(HOME)/.config/nvim \
+	active/tmux/tmux.conf:$(HOME)/.tmux.conf
+
+CURSOR_USER_DIR := $(HOME)/Library/Application Support/Cursor/User
 
 # ─── Targets ──────────────────────────────────────────────────────────────────
 
-.PHONY: setup setup-remote install-nvim-remote brew link nvim-plugins status clean help
+.PHONY: setup setup-remote install-nvim-remote brew link link-cursor nvim-plugins cursor-extensions cursor-extensions-install status clean help
 
 ## Full setup from scratch
-setup: brew link nvim-plugins
+setup: brew link link-cursor nvim-plugins
 	@echo ""
 	@echo "✅ Setup complete!"
 	@echo ""
@@ -93,11 +96,51 @@ link:
 		ln -sf "$(TOOLBOX_DIR)/$$src" "$$dst"; \
 	done
 
+## Symlink Cursor configs
+link-cursor:
+	@echo "── Symlinking Cursor configs ──"
+	@mkdir -p "$(CURSOR_USER_DIR)"
+	@for file in settings.json keybindings.json; do \
+		dst="$(CURSOR_USER_DIR)/$$file"; \
+		src="$(TOOLBOX_DIR)/active/cursor/$$file"; \
+		if [ -L "$$dst" ]; then \
+			echo "  relink $$dst -> $$src"; \
+			rm "$$dst"; \
+		elif [ -e "$$dst" ]; then \
+			echo "  backup $$dst -> $$dst.bak"; \
+			mv "$$dst" "$$dst.bak"; \
+		else \
+			echo "  link   $$dst -> $$src"; \
+		fi; \
+		ln -sf "$$src" "$$dst"; \
+	done
+
 ## Install nvim plugins (headless)
 nvim-plugins:
 	@echo "── Installing nvim plugins ──"
 	nvim --headless "+Lazy! sync" +qa 2>/dev/null || true
 	@echo "  done"
+
+## Export installed Cursor extensions to active/cursor/extensions.txt
+cursor-extensions:
+	@echo "── Exporting Cursor extensions ──"
+	@if command -v cursor >/dev/null 2>&1; then \
+		cursor --list-extensions > active/cursor/extensions.txt; \
+		echo "  Saved to active/cursor/extensions.txt"; \
+	else \
+		echo "  cursor CLI not found, skipping"; \
+	fi
+
+## Install Cursor extensions from active/cursor/extensions.txt
+cursor-extensions-install:
+	@echo "── Installing Cursor extensions ──"
+	@if command -v cursor >/dev/null 2>&1; then \
+		while read ext; do \
+			cursor --install-extension "$$ext"; \
+		done < active/cursor/extensions.txt; \
+	else \
+		echo "  cursor CLI not found, skipping"; \
+	fi
 
 ## Show what's installed and linked
 status:
@@ -120,6 +163,17 @@ status:
 			echo "  ❌ $$dst (missing)"; \
 		fi; \
 	done
+	@echo "── Cursor symlinks ──"
+	@for file in settings.json keybindings.json; do \
+		dst="$(CURSOR_USER_DIR)/$$file"; \
+		if [ -L "$$dst" ]; then \
+			echo "  ✅ $$dst -> $$(readlink "$$dst")"; \
+		elif [ -e "$$dst" ]; then \
+			echo "  ⚠️  $$dst (exists but not a symlink)"; \
+		else \
+			echo "  ❌ $$dst (missing)"; \
+		fi; \
+	done
 	@echo "── Font ──"
 	@if fc-list 2>/dev/null | grep -qi "JetBrainsMono Nerd" || ls ~/Library/Fonts/*JetBrainsMono*Nerd* >/dev/null 2>&1; then \
 		echo "  ✅ JetBrainsMono Nerd Font"; \
@@ -132,6 +186,18 @@ clean:
 	@echo "── Removing symlinks ──"
 	@for pair in $(SYMLINKS); do \
 		dst=$${pair##*:}; \
+		if [ -L "$$dst" ]; then \
+			echo "  remove $$dst"; \
+			rm "$$dst"; \
+			if [ -e "$$dst.bak" ]; then \
+				echo "  restore $$dst.bak -> $$dst"; \
+				mv "$$dst.bak" "$$dst"; \
+			fi; \
+		fi; \
+	done
+	@echo "── Removing Cursor symlinks ──"
+	@for file in settings.json keybindings.json; do \
+		dst="$(CURSOR_USER_DIR)/$$file"; \
 		if [ -L "$$dst" ]; then \
 			echo "  remove $$dst"; \
 			rm "$$dst"; \

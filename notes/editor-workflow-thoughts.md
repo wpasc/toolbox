@@ -21,10 +21,6 @@ Why VS Code for notes:
 
 This isn't ideal in the abstract (two editors), but it might be practical — VS Code does some things that Emacs just won't, and the single-instance constraint keeps it from becoming the sprawl problem it was before.
 
-## Future Action: VS Code Settings in Toolbox
+## VS Code / Cursor Settings in Toolbox
 
-It would be cool to have VS Code settings tracked in this toolbox so they can be:
-- Version controlled alongside everything else
-- Easily mapped and synced with Neovim settings (shared keybindings, consistent behavior)
-
-This would mean adding a `projects/vscode/` directory (config, notes, scripts) following the existing pattern.
+Done — Cursor settings now live in `active/cursor/` (settings.json, keybindings.json, extensions.txt), version controlled and symlinked via `make link-cursor`.
