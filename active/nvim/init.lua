@@ -56,6 +56,9 @@ vim.g.clipboard = {
   },
 }
 
+-- Yank/change reporting (default is 2, so single-line yanks are silent)
+vim.opt.report = 0
+
 -- Undo persistence (keep undo history across sessions)
 vim.opt.undofile = true
 

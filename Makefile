@@ -9,8 +9,11 @@ SHELL := /bin/bash
 TOOLBOX_DIR := $(shell pwd)
 
 # ─── What to install ──────────────────────────────────────────────────────────
-# Add new brew packages here as your setup evolves
-BREW_PACKAGES := neovim tmux ripgrep fd bat git-delta fzf
+# CLI tools installed from GitHub releases (via scripts/install-cli-tool)
+CLI_TOOLS := ripgrep fd bat delta fzf neovim
+
+# Brew is only for things without prebuilt binaries + font casks
+BREW_PACKAGES := tmux
 BREW_CASKS := font-jetbrains-mono-nerd-font
 
 # ─── What to symlink ─────────────────────────────────────────────────────────
@@ -25,21 +28,23 @@ CURSOR_USER_DIR := $(HOME)/Library/Application Support/Cursor/User
 
 # ─── Targets ──────────────────────────────────────────────────────────────────
 
-.PHONY: setup setup-remote install-nvim-remote brew link link-cursor nvim-plugins configure-cli-tools cursor-extensions cursor-extensions-install status clean help
+.PHONY: setup setup-remote install-cli-tools force-install-cli-tools brew link link-cursor nvim-plugins tmux-plugins configure-cli-tools cursor-extensions cursor-extensions-install status clean help
 
 ## Full setup from scratch
-setup: brew link link-cursor nvim-plugins configure-cli-tools
+setup: install-cli-tools brew link link-cursor nvim-plugins tmux-plugins configure-cli-tools
 	@echo ""
 	@echo "✅ Setup complete!"
 	@echo ""
 	@echo "Next steps:"
-	@echo "  1. Set your terminal font to 'JetBrainsMono Nerd Font'"
-	@echo "  2. Restart your terminal"
-	@echo "  3. Run: tmux new -s main"
-	@echo "  4. Run: nvim"
+	@echo "  1. Ensure ~/.local/bin is in your PATH:"
+	@echo "     export PATH=\"\$$HOME/.local/bin:\$$PATH\""
+	@echo "  2. Set your terminal font to 'JetBrainsMono Nerd Font'"
+	@echo "  3. Restart your terminal"
+	@echo "  4. Run: tmux new -s main"
+	@echo "  5. Run: nvim"
 
 ## Setup for remote Linux machines (no brew, no sudo, no npm)
-setup-remote: install-nvim-remote link nvim-plugins
+setup-remote: install-cli-tools link nvim-plugins tmux-plugins configure-cli-tools
 	@echo ""
 	@echo "✅ Remote setup complete!"
 	@echo ""
@@ -50,24 +55,25 @@ setup-remote: install-nvim-remote link nvim-plugins
 	@echo "  3. Run: tmux new -s main"
 	@echo "  4. Run: nvim"
 	@echo ""
-	@echo "Note: markdown-preview (browser) is skipped without npm."
+	@echo "Note: tmux must be installed separately on remote (system package manager)."
+	@echo "      markdown-preview (browser) is skipped without npm."
 	@echo "      render-markdown (in-buffer) works without it."
 
-## Install neovim on Linux without a package manager
-install-nvim-remote:
-	@echo "── Installing neovim ──"
-	@mkdir -p $(HOME)/.local/bin $(HOME)/.local/share
-	@if command -v nvim >/dev/null 2>&1; then \
-		echo "  nvim already available: $$(nvim --version | head -1)"; \
-		echo "  (remove it or adjust PATH to reinstall)"; \
-	else \
-		echo "  Downloading nvim..."; \
-		curl -Lo /tmp/nvim.tar.gz https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.tar.gz; \
-		tar xzf /tmp/nvim.tar.gz -C $(HOME)/.local/share; \
-		ln -sf $(HOME)/.local/share/nvim-linux-x86_64/bin/nvim $(HOME)/.local/bin/nvim; \
-		rm /tmp/nvim.tar.gz; \
-		echo "  Installed to ~/.local/bin/nvim"; \
-	fi
+## Install CLI tools from GitHub releases to ~/.local/bin
+install-cli-tools:
+	@echo "── Installing CLI tools from GitHub releases ──"
+	@mkdir -p $(HOME)/.local/bin
+	@for tool in $(CLI_TOOLS); do \
+		bash $(TOOLBOX_DIR)/scripts/install-cli-tool "$$tool"; \
+	done
+
+## Force-reinstall all CLI tools (re-downloads latest)
+force-install-cli-tools:
+	@echo "── Force-installing CLI tools ──"
+	@mkdir -p $(HOME)/.local/bin
+	@for tool in $(CLI_TOOLS); do \
+		bash $(TOOLBOX_DIR)/scripts/install-cli-tool "$$tool" --force; \
+	done
 
 ## Install brew packages and casks
 brew:
@@ -148,6 +154,21 @@ nvim-plugins:
 	nvim --headless "+Lazy! sync" +qa 2>/dev/null || true
 	@echo "  done"
 
+## Install tmux plugins (TPM)
+tmux-plugins:
+	@echo "── Installing tmux plugins ──"
+	@if [ ! -d "$(HOME)/.tmux/plugins/tpm" ]; then \
+		echo "  Cloning TPM..."; \
+		git clone https://github.com/tmux-plugins/tpm "$(HOME)/.tmux/plugins/tpm"; \
+	else \
+		echo "  TPM already installed"; \
+	fi
+	@echo "  Installing plugins..."
+	@tmux start-server \; set-environment -g TMUX_PLUGIN_MANAGER_PATH "$(HOME)/.tmux/plugins/" \; source-file "$(HOME)/.tmux.conf" 2>/dev/null; \
+		$(HOME)/.tmux/plugins/tpm/bin/install_plugins; \
+		tmux kill-server 2>/dev/null || true
+	@echo "  done"
+
 ## Export installed Cursor extensions to active/cursor/extensions.txt
 cursor-extensions:
 	@echo "── Exporting Cursor extensions ──"
@@ -171,12 +192,20 @@ cursor-extensions-install:
 
 ## Show what's installed and linked
 status:
+	@echo "── CLI tools ──"
+	@for tool in $(CLI_TOOLS); do \
+		bin=$$tool; \
+		case $$tool in ripgrep) bin=rg;; neovim) bin=nvim;; esac; \
+		if command -v "$$bin" >/dev/null 2>&1; then \
+			echo "  ✅ $$tool ($$($$bin --version 2>/dev/null | head -1))"; \
+		else \
+			echo "  ❌ $$tool (not installed)"; \
+		fi; \
+	done
 	@echo "── Brew packages ──"
 	@for pkg in $(BREW_PACKAGES); do \
-		bin=$$pkg; \
-		case $$pkg in ripgrep) bin=rg;; git-delta) bin=delta;; esac; \
-		if command -v "$$bin" >/dev/null 2>&1; then \
-			echo "  ✅ $$pkg ($$($$bin --version 2>/dev/null | head -1))"; \
+		if command -v "$$pkg" >/dev/null 2>&1; then \
+			echo "  ✅ $$pkg ($$($$pkg -V 2>/dev/null | head -1))"; \
 		else \
 			echo "  ❌ $$pkg (not installed)"; \
 		fi; \
@@ -203,6 +232,18 @@ status:
 			echo "  ❌ $$dst (missing)"; \
 		fi; \
 	done
+	@echo "── Tmux plugins (TPM) ──"
+	@if [ -d "$(HOME)/.tmux/plugins/tpm" ]; then \
+		echo "  ✅ TPM"; \
+		for dir in $(HOME)/.tmux/plugins/*/; do \
+			name=$$(basename "$$dir"); \
+			if [ "$$name" != "tpm" ]; then \
+				echo "  ✅ $$name"; \
+			fi; \
+		done; \
+	else \
+		echo "  ❌ TPM (not installed — run: make tmux-plugins)"; \
+	fi
 	@echo "── Font ──"
 	@if fc-list 2>/dev/null | grep -qi "JetBrainsMono Nerd" || ls ~/Library/Fonts/*JetBrainsMono*Nerd* >/dev/null 2>&1; then \
 		echo "  ✅ JetBrainsMono Nerd Font"; \

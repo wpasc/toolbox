@@ -1,0 +1,214 @@
+#!/usr/bin/env bash
+# install-cli-tool - Download latest prebuilt binary from GitHub releases
+#
+# Usage: install-cli-tool <tool> [--force]
+#   Tools: ripgrep, fd, bat, delta, fzf, neovim
+#
+# Installs single binaries to ~/.local/bin.
+# Installs neovim tree to ~/.local/share, symlinks bin into ~/.local/bin.
+# Detects OS (Darwin/Linux) and architecture (arm64/x86_64).
+# Skips if already installed unless --force is given.
+#
+# Dependencies: curl, tar
+
+set -euo pipefail
+
+TOOL="${1:-}"
+FORCE="${2:-}"
+INSTALL_BIN="$HOME/.local/bin"
+INSTALL_SHARE="$HOME/.local/share"
+
+if [[ -z "$TOOL" ]]; then
+  echo "usage: install-cli-tool <tool> [--force]" >&2
+  echo "tools: ripgrep, fd, bat, delta, fzf, neovim" >&2
+  exit 1
+fi
+
+# --- OS and architecture detection ---
+
+OS="$(uname -s)"
+ARCH="$(uname -m)"
+
+case "$OS" in
+  Darwin) os="darwin" ;;
+  Linux)  os="linux" ;;
+  *)      echo "error: unsupported OS: $OS" >&2; exit 1 ;;
+esac
+
+case "$ARCH" in
+  arm64|aarch64) arch="arm64" ;;
+  x86_64)        arch="x86_64" ;;
+  *)             echo "error: unsupported architecture: $ARCH" >&2; exit 1 ;;
+esac
+
+# --- Helpers ---
+
+get_latest_tag() {
+  curl -sI "https://github.com/${1}/releases/latest" \
+    | grep -i '^location:' \
+    | sed 's|.*/||' \
+    | tr -d '\r\n'
+}
+
+download_and_extract() {
+  local url="$1"
+  curl -sL "$url" | tar xzf - -C "$TMPDIR_WORK"
+}
+
+already_installed() {
+  local bin="$1"
+  if [[ "$FORCE" == "--force" ]]; then
+    return 1
+  fi
+  if command -v "$bin" >/dev/null 2>&1; then
+    echo "  $TOOL: $(command -v "$bin") already exists, skipping (use --force to reinstall)"
+    return 0
+  fi
+  return 1
+}
+
+# --- Per-tool install functions ---
+
+install_ripgrep() {
+  already_installed rg && return 0
+
+  local tag repo="BurntSushi/ripgrep"
+  tag="$(get_latest_tag "$repo")"
+
+  local triple
+  if [[ "$os" == "darwin" ]]; then
+    [[ "$arch" == "arm64" ]] && triple="aarch64-apple-darwin" || triple="x86_64-apple-darwin"
+  else
+    [[ "$arch" == "arm64" ]] && triple="aarch64-unknown-linux-gnu" || triple="x86_64-unknown-linux-musl"
+  fi
+
+  local asset="ripgrep-${tag}-${triple}.tar.gz"
+  echo "  ripgrep: downloading $tag..."
+  download_and_extract "https://github.com/${repo}/releases/download/${tag}/${asset}"
+  cp "${TMPDIR_WORK}"/ripgrep-*/rg "$INSTALL_BIN/rg"
+  chmod +x "$INSTALL_BIN/rg"
+  echo "  ripgrep: installed rg to $INSTALL_BIN/rg"
+}
+
+install_fd() {
+  already_installed fd && return 0
+
+  local tag repo="sharkdp/fd"
+  tag="$(get_latest_tag "$repo")"
+
+  local triple
+  if [[ "$os" == "darwin" ]]; then
+    if [[ "$arch" == "arm64" ]]; then
+      triple="aarch64-apple-darwin"
+    else
+      echo "  fd: no x86_64 macOS build available, try 'brew install fd' or use Rosetta" >&2
+      return 1
+    fi
+  else
+    [[ "$arch" == "arm64" ]] && triple="aarch64-unknown-linux-gnu" || triple="x86_64-unknown-linux-gnu"
+  fi
+
+  local asset="fd-${tag}-${triple}.tar.gz"
+  echo "  fd: downloading $tag..."
+  download_and_extract "https://github.com/${repo}/releases/download/${tag}/${asset}"
+  cp "${TMPDIR_WORK}"/fd-*/fd "$INSTALL_BIN/fd"
+  chmod +x "$INSTALL_BIN/fd"
+  echo "  fd: installed to $INSTALL_BIN/fd"
+}
+
+install_bat() {
+  already_installed bat && return 0
+
+  local tag repo="sharkdp/bat"
+  tag="$(get_latest_tag "$repo")"
+
+  local triple
+  if [[ "$os" == "darwin" ]]; then
+    [[ "$arch" == "arm64" ]] && triple="aarch64-apple-darwin" || triple="x86_64-apple-darwin"
+  else
+    [[ "$arch" == "arm64" ]] && triple="aarch64-unknown-linux-gnu" || triple="x86_64-unknown-linux-gnu"
+  fi
+
+  local asset="bat-${tag}-${triple}.tar.gz"
+  echo "  bat: downloading $tag..."
+  download_and_extract "https://github.com/${repo}/releases/download/${tag}/${asset}"
+  cp "${TMPDIR_WORK}"/bat-*/bat "$INSTALL_BIN/bat"
+  chmod +x "$INSTALL_BIN/bat"
+  echo "  bat: installed to $INSTALL_BIN/bat"
+}
+
+install_delta() {
+  already_installed delta && return 0
+
+  local tag repo="dandavison/delta"
+  tag="$(get_latest_tag "$repo")"
+
+  local triple
+  if [[ "$os" == "darwin" ]]; then
+    [[ "$arch" == "arm64" ]] && triple="aarch64-apple-darwin" || triple="x86_64-apple-darwin"
+  else
+    [[ "$arch" == "arm64" ]] && triple="aarch64-unknown-linux-gnu" || triple="x86_64-unknown-linux-gnu"
+  fi
+
+  local asset="delta-${tag}-${triple}.tar.gz"
+  echo "  delta: downloading $tag..."
+  download_and_extract "https://github.com/${repo}/releases/download/${tag}/${asset}"
+  cp "${TMPDIR_WORK}"/delta-*/delta "$INSTALL_BIN/delta"
+  chmod +x "$INSTALL_BIN/delta"
+  echo "  delta: installed to $INSTALL_BIN/delta"
+}
+
+install_fzf() {
+  already_installed fzf && return 0
+
+  local tag repo="junegunn/fzf"
+  tag="$(get_latest_tag "$repo")"
+  local ver="${tag#v}"
+
+  local fzf_os="$os" fzf_arch
+  [[ "$arch" == "arm64" ]] && fzf_arch="arm64" || fzf_arch="amd64"
+
+  local asset="fzf-${ver}-${fzf_os}_${fzf_arch}.tar.gz"
+  echo "  fzf: downloading $tag..."
+  download_and_extract "https://github.com/${repo}/releases/download/${tag}/${asset}"
+  cp "${TMPDIR_WORK}/fzf" "$INSTALL_BIN/fzf"
+  chmod +x "$INSTALL_BIN/fzf"
+  echo "  fzf: installed to $INSTALL_BIN/fzf"
+}
+
+install_neovim() {
+  already_installed nvim && return 0
+
+  local tag repo="neovim/neovim"
+  tag="$(get_latest_tag "$repo")"
+
+  local nvim_os nvim_arch
+  [[ "$os" == "darwin" ]] && nvim_os="macos" || nvim_os="linux"
+  [[ "$arch" == "arm64" ]] && nvim_arch="arm64" || nvim_arch="x86_64"
+
+  local asset="nvim-${nvim_os}-${nvim_arch}.tar.gz"
+  echo "  neovim: downloading $tag..."
+  download_and_extract "https://github.com/${repo}/releases/download/${tag}/${asset}"
+
+  # remove old install, move new one in
+  rm -rf "${INSTALL_SHARE}/nvim-current"
+  mv "${TMPDIR_WORK}"/nvim-*/ "${INSTALL_SHARE}/nvim-current"
+  ln -sf "${INSTALL_SHARE}/nvim-current/bin/nvim" "$INSTALL_BIN/nvim"
+  echo "  neovim: installed to $INSTALL_SHARE/nvim-current, symlinked $INSTALL_BIN/nvim"
+}
+
+# --- Main ---
+
+mkdir -p "$INSTALL_BIN" "$INSTALL_SHARE"
+TMPDIR_WORK="$(mktemp -d)"
+trap 'rm -rf "$TMPDIR_WORK"' EXIT
+
+case "$TOOL" in
+  ripgrep) install_ripgrep ;;
+  fd)      install_fd ;;
+  bat)     install_bat ;;
+  delta)   install_delta ;;
+  fzf)     install_fzf ;;
+  neovim)  install_neovim ;;
+  *)       echo "error: unknown tool: $TOOL" >&2; exit 1 ;;
+esac

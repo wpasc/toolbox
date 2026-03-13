@@ -1,17 +1,28 @@
 // Place your key bindings in this file to override the defaults
 [
+    // Cmd+I: Cursor defaults this to inline chat, but agent mode is far more useful
+    // as the primary AI interaction. Inline chat is still available via the menu.
     {
         "key": "cmd+i",
         "command": "composerMode.agent"
     },
+
+    // Shift+Cmd+D: Go to definition. Mirrors NeoVim's gd muscle memory but in a
+    // Mac-native chord. Shift+Cmd was chosen as the modifier pattern for all
+    // code-navigation bindings (D=definition, R=references) to keep them consistent
+    // and avoid conflicts with existing Cmd+D (add selection to next find match).
     {
         "key": "shift+cmd+d",
         "command": "editor.action.revealDefinition",
         "when": "editorTextFocus"
     },
+
+    // Shift+Cmd+R: Find references (inline peek). Uses goToReferences for the
+    // inline peek view (like Shift+F12) rather than references-view.findReferences
+    // which opens the sidebar panel. Inline peek is faster for quick lookups.
     {
         "key": "shift+cmd+r",
-        "command": "references-view.findReferences",
+        "command": "editor.action.goToReferences",
         "when": "editorTextFocus"
     }
 ]

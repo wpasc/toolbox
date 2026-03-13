@@ -48,6 +48,7 @@ notes/              # Cross-cutting learning notes
 - **Notes**: Use markdown with clear headings. Tool-specific notes go in the tool directory; cross-cutting notes go in top-level `notes/`.
 - **Configs**: Live directly in `active/[tool]/`, symlinked to their expected system locations via Makefile.
 - **Scripts**: Include a comment header explaining purpose and usage. Live in top-level `scripts/`.
+- **Keybindings**: Custom keybindings should include inline comments explaining the reasoning — why this binding was chosen, what alternatives were considered, and what default it replaces. This context prevents re-investigating the same decisions later.
 
 ## Common Workflows
 

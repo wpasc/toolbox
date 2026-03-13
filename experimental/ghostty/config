@@ -1,0 +1,69 @@
+# Ghostty Configuration
+# Philosophy: start minimal, override only for clear ergonomic wins
+# Docs: https://ghostty.org/docs/config/reference
+
+# =============================================================================
+# FONT
+# =============================================================================
+# Ghostty uses the system monospace font by default.
+# Uncomment and set to your preferred font:
+# font-family = "JetBrains Mono"
+# font-size = 14
+
+# =============================================================================
+# THEME
+# =============================================================================
+# Ghostty ships 100+ built-in themes. List them with: ghostty +list-themes
+# theme = vscode-dark
+
+# =============================================================================
+# WINDOW
+# =============================================================================
+# window-padding-x = 4
+# window-padding-y = 4
+
+# =============================================================================
+# CLIPBOARD
+# =============================================================================
+# OSC 52 clipboard support (needed for Neovim clipboard over SSH / inside tmux)
+# Writes are allowed by default; reads prompt for permission
+clipboard-read = allow
+clipboard-write = allow
+
+# =============================================================================
+# CMD KEY → TMUX BINDINGS
+# =============================================================================
+# Goal: make tmux feel like a native macOS app by mapping Cmd+key to tmux actions.
+# Ghostty can intercept Cmd combos and send them as key sequences to tmux.
+# The prefix is Ctrl+Space, so we send that followed by the action key.
+#
+# Why: Cmd+key is ergonomic (thumb+finger), matches browser/Cursor/VS Code habits.
+# Without this, every tmux action is a two-step prefix sequence.
+# Space as NeoVim leader handles editor-level commands — no conflict.
+#
+# Format: keybind = cmd+key=csi:prefix_sequence
+# These require testing once Ghostty is installed and tmux is running.
+#
+# Planned mappings:
+#   Cmd+N     → new window        (prefix + n)
+#   Cmd+W     → close window      (prefix + w)
+#   Cmd+1-9   → switch to window  (prefix + 1-9)
+#   Cmd+D     → vertical split    (prefix + |)
+#   Cmd+Shift+D → horizontal split (prefix + -)
+#   Cmd+Opt+Arrow → move between panes (prefix + h/j/k/l)
+#
+# TODO: implement these once Ghostty is installed and we can test the exact
+# key sequence syntax. See: https://ghostty.org/docs/config/keybind
+
+# =============================================================================
+# MOUSE
+# =============================================================================
+# Mouse reporting enabled by default — Neovim and tmux receive mouse events
+
+# =============================================================================
+# SHELL INTEGRATION
+# =============================================================================
+# Ghostty auto-detects your shell and injects its shell integration script.
+# This gives you: clickable prompts, semantic zones, sudo password detection.
+# Disable if it conflicts with your shell config:
+# shell-integration = none
