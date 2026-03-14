@@ -21,7 +21,8 @@ setopt HIST_VERIFY            # Show expanded history before executing
 # These daily logs are designed to be fed to an LLM for pattern analysis —
 # identifying power-user opportunities and repeated mistakes.
 
-TOOLBOX_HISTORY_DIR="$HOME/workspace/toolbox/usage-logs/shell"
+# Derive toolbox root from this script's location (active/zsh/history.zsh → repo root)
+TOOLBOX_HISTORY_DIR="${0:A:h}/../../usage-logs/shell"
 mkdir -p "$TOOLBOX_HISTORY_DIR"
 
 _daily_history_log() {
