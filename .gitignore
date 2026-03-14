@@ -6,6 +6,9 @@
 experiments/**/*.log
 experiments/**/*.tmp
 
+# Usage logs (shell history, future: claude, neovim, etc.)
+usage-logs/*/
+
 # OS files
 .DS_Store
 Thumbs.db

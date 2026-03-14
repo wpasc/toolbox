@@ -38,6 +38,10 @@ vim.opt.scrolloff = 8 -- Keep 8 lines visible above/below cursor
 vim.opt.splitright = true -- Vertical splits open to the right
 vim.opt.splitbelow = true -- Horizontal splits open below
 
+-- Set terminal title to the current filename.
+-- tmux picks this up as the window name, so the tab shows what file you're editing.
+vim.opt.title = true
+
 -- Clipboard (use system clipboard)
 -- On remote machines there is no clipboard provider (no X11/Wayland/pbcopy).
 -- OSC 52 tunnels clipboard data through the SSH connection to the local terminal.

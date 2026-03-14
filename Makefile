@@ -14,50 +14,62 @@ CLI_TOOLS := ripgrep fd bat delta fzf neovim
 
 # Brew is only for things without prebuilt binaries + font casks
 BREW_PACKAGES := tmux
-BREW_CASKS := font-jetbrains-mono-nerd-font
+BREW_CASKS := font-jetbrains-mono-nerd-font ghostty
 
 # ─── What to symlink ─────────────────────────────────────────────────────────
 # Format: source:target
-# Add new config symlinks here as you add tools
-# Note: Cursor symlinks handled separately (link-cursor) due to spaces in path
+# SYMLINKS: shared configs (nvim, tmux) — used by both local and remote
+# SYMLINKS_MACOS: macOS-only configs (Ghostty) — skipped on remote
+# Cursor symlinks handled separately (link-cursor) due to spaces in path
 SYMLINKS := \
 	active/nvim:$(HOME)/.config/nvim \
 	active/tmux/tmux.conf:$(HOME)/.tmux.conf
+
+SYMLINKS_MACOS := \
+	active/ghostty/config:$(HOME)/.config/ghostty/config
 
 CURSOR_USER_DIR := $(HOME)/Library/Application Support/Cursor/User
 
 # ─── Targets ──────────────────────────────────────────────────────────────────
 
-.PHONY: setup setup-remote install-cli-tools force-install-cli-tools brew link link-cursor nvim-plugins tmux-plugins configure-cli-tools cursor-extensions cursor-extensions-install status clean help
+.PHONY: setup setup-remote install-cli-tools force-install-cli-tools brew link link-macos link-cursor nvim-plugins tmux-plugins configure-cli-tools cursor-extensions cursor-extensions-install status clean help
 
-## Full setup from scratch
-setup: install-cli-tools brew link link-cursor nvim-plugins tmux-plugins configure-cli-tools
+## Full setup from scratch (macOS)
+setup: install-cli-tools brew link link-macos link-cursor nvim-plugins tmux-plugins configure-cli-tools
 	@echo ""
 	@echo "✅ Setup complete!"
 	@echo ""
-	@echo "Next steps:"
+	@echo "Manual steps:"
 	@echo "  1. Ensure ~/.local/bin is in your PATH:"
 	@echo "     export PATH=\"\$$HOME/.local/bin:\$$PATH\""
-	@echo "  2. Set your terminal font to 'JetBrainsMono Nerd Font'"
-	@echo "  3. Restart your terminal"
-	@echo "  4. Run: tmux new -s main"
-	@echo "  5. Run: nvim"
+	@echo "  2. Add fzf shell integration to your .zshrc:"
+	@echo "     source <(fzf --zsh)"
+	@echo "  3. Source zsh history config in your .zshrc:"
+	@echo "     source ~/workspace/toolbox/active/zsh/history.zsh"
+	@echo "  4. Open Ghostty (installed via brew cask)"
+	@echo "     - Font: set to 'JetBrainsMono Nerd Font' in Ghostty config if desired"
+	@echo "     - Cmd+T/W/1-9 are mapped to tmux window management"
+	@echo "     - Cmd+\\ and Cmd+- split panes (also works in Cursor)"
+	@echo "  5. Start tmux with a named session: tmux new -s main"
+	@echo "  6. Run: nvim"
 
 ## Setup for remote Linux machines (no brew, no sudo, no npm)
 setup-remote: install-cli-tools link nvim-plugins tmux-plugins configure-cli-tools
 	@echo ""
 	@echo "✅ Remote setup complete!"
 	@echo ""
-	@echo "Next steps:"
+	@echo "Manual steps:"
 	@echo "  1. Ensure ~/.local/bin is in your PATH:"
 	@echo "     echo 'export PATH=\"\$$HOME/.local/bin:\$$PATH\"' >> ~/.bashrc"
-	@echo "  2. Restart your shell or: source ~/.bashrc"
-	@echo "  3. Run: tmux new -s main"
-	@echo "  4. Run: nvim"
+	@echo "  2. Add fzf shell integration to your shell config:"
+	@echo "     echo 'eval \"\$$(fzf --bash)\"' >> ~/.bashrc"
+	@echo "  3. Restart your shell or: source ~/.bashrc"
+	@echo "  4. Start tmux with a named session: tmux new -s main"
+	@echo "  5. Run: nvim"
 	@echo ""
-	@echo "Note: tmux must be installed separately on remote (system package manager)."
-	@echo "      markdown-preview (browser) is skipped without npm."
-	@echo "      render-markdown (in-buffer) works without it."
+	@echo "Prerequisites (install via system package manager if missing):"
+	@echo "  - tmux: sudo apt install tmux  (or yum/dnf equivalent)"
+	@echo "  - git:  sudo apt install git   (needed for TPM plugin install)"
 
 ## Install CLI tools from GitHub releases to ~/.local/bin
 install-cli-tools:
@@ -87,6 +99,25 @@ brew:
 link:
 	@echo "── Symlinking configs ──"
 	@for pair in $(SYMLINKS); do \
+		src=$${pair%%:*}; \
+		dst=$${pair##*:}; \
+		mkdir -p "$$(dirname "$$dst")"; \
+		if [ -L "$$dst" ]; then \
+			echo "  relink $$dst -> $$src"; \
+			rm "$$dst"; \
+		elif [ -e "$$dst" ]; then \
+			echo "  backup $$dst -> $$dst.bak"; \
+			mv "$$dst" "$$dst.bak"; \
+		else \
+			echo "  link   $$dst -> $$src"; \
+		fi; \
+		ln -sf "$(TOOLBOX_DIR)/$$src" "$$dst"; \
+	done
+
+## Symlink macOS-only configs (Ghostty)
+link-macos:
+	@echo "── Symlinking macOS configs ──"
+	@for pair in $(SYMLINKS_MACOS); do \
 		src=$${pair%%:*}; \
 		dst=$${pair##*:}; \
 		mkdir -p "$$(dirname "$$dst")"; \
@@ -221,6 +252,17 @@ status:
 			echo "  ❌ $$dst (missing)"; \
 		fi; \
 	done
+	@echo "── macOS symlinks (Ghostty) ──"
+	@for pair in $(SYMLINKS_MACOS); do \
+		dst=$${pair##*:}; \
+		if [ -L "$$dst" ]; then \
+			echo "  ✅ $$dst -> $$(readlink "$$dst")"; \
+		elif [ -e "$$dst" ]; then \
+			echo "  ⚠️  $$dst (exists but not a symlink)"; \
+		else \
+			echo "  ❌ $$dst (missing)"; \
+		fi; \
+	done
 	@echo "── Cursor symlinks ──"
 	@for file in settings.json keybindings.json; do \
 		dst="$(CURSOR_USER_DIR)/$$file"; \
@@ -255,6 +297,18 @@ status:
 clean:
 	@echo "── Removing symlinks ──"
 	@for pair in $(SYMLINKS); do \
+		dst=$${pair##*:}; \
+		if [ -L "$$dst" ]; then \
+			echo "  remove $$dst"; \
+			rm "$$dst"; \
+			if [ -e "$$dst.bak" ]; then \
+				echo "  restore $$dst.bak -> $$dst"; \
+				mv "$$dst.bak" "$$dst"; \
+			fi; \
+		fi; \
+	done
+	@echo "── Removing macOS symlinks ──"
+	@for pair in $(SYMLINKS_MACOS); do \
 		dst=$${pair##*:}; \
 		if [ -L "$$dst" ]; then \
 			echo "  remove $$dst"; \

@@ -39,6 +39,8 @@ experimental/       # Tools under evaluation (not yet active)
     notes/
 scripts/            # Standalone utility scripts
 notes/              # Cross-cutting learning notes
+usage-logs/         # Tool usage logs for LLM analysis (gitignored contents)
+  shell/            #   Daily shell command logs (via active/zsh/history.zsh)
 ```
 
 ## Key Patterns
@@ -48,6 +50,7 @@ notes/              # Cross-cutting learning notes
 - **Notes**: Use markdown with clear headings. Tool-specific notes go in the tool directory; cross-cutting notes go in top-level `notes/`.
 - **Configs**: Live directly in `active/[tool]/`, symlinked to their expected system locations via Makefile.
 - **Scripts**: Include a comment header explaining purpose and usage. Live in top-level `scripts/`.
+- **Usage logs**: Daily tool usage logs live in `usage-logs/[tool]/`. Contents are gitignored; only the directory structure and capture configs are tracked. Designed to be fed to an LLM for pattern analysis.
 - **Keybindings**: Custom keybindings should include inline comments explaining the reasoning — why this binding was chosen, what alternatives were considered, and what default it replaces. This context prevents re-investigating the same decisions later.
 
 ## Common Workflows

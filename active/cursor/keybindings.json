@@ -24,5 +24,21 @@
         "key": "shift+cmd+r",
         "command": "editor.action.goToReferences",
         "when": "editorTextFocus"
+    },
+
+    // Cmd+\: Split editor right. Matches Ghostty/tmux Cmd+\ for vertical split.
+    // Consistent cross-tool muscle memory: same shortcut splits in both terminal and editor.
+    {
+        "key": "cmd+\\",
+        "command": "workbench.action.splitEditor",
+        "when": "editorTextFocus"
+    },
+
+    // Cmd+-: Split editor down. Matches Ghostty/tmux Cmd+- for horizontal split.
+    // Overrides default Cmd+- (zoom out), which is rarely needed in an editor.
+    {
+        "key": "cmd+-",
+        "command": "workbench.action.splitEditorDown",
+        "when": "editorTextFocus"
     }
 ]
