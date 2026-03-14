@@ -11,8 +11,7 @@
 #   4. git push
 #
 # Setup:
-#   Add this to your .zshrc:
-#     export PATH="$HOME/workspace/toolbox/scripts:$PATH"
+#   Add toolbox scripts to your PATH (run `make setup` for details)
 #
 # Dependencies: git
 
