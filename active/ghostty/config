@@ -74,6 +74,22 @@ keybind = super+digit_8=text:\x008
 keybind = super+9=text:\x009
 keybind = super+digit_9=text:\x009
 
+# --- Ghostty-native actions via Cmd+Shift ---
+# Cmd+key is mapped to tmux above, so Cmd+Shift restores Ghostty's own actions.
+# Useful when running multiple Ghostty tabs/windows alongside tmux.
+keybind = super+shift+n=new_window
+keybind = super+shift+t=new_tab
+keybind = super+shift+w=close_surface
+keybind = super+shift+1=goto_tab:1
+keybind = super+shift+2=goto_tab:2
+keybind = super+shift+3=goto_tab:3
+keybind = super+shift+4=goto_tab:4
+keybind = super+shift+5=goto_tab:5
+keybind = super+shift+6=goto_tab:6
+keybind = super+shift+7=goto_tab:7
+keybind = super+shift+8=goto_tab:8
+keybind = super+shift+9=goto_tab:9
+
 # --- Splits ---
 # Cmd+\: vertical split (left/right). Matches Cursor/VS Code split editor binding.
 keybind = super+backslash=text:\x00|
