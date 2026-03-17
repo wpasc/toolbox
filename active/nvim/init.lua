@@ -38,9 +38,11 @@ vim.opt.scrolloff = 8 -- Keep 8 lines visible above/below cursor
 vim.opt.splitright = true -- Vertical splits open to the right
 vim.opt.splitbelow = true -- Horizontal splits open below
 
--- Set terminal title to the current filename.
--- tmux picks this up as the window name, so the tab shows what file you're editing.
+-- Set terminal title to just the filename (tail only).
+-- tmux picks this up as the window name via #{pane_title}.
+-- Default titlestring includes path and "- NVIM" which bloats tmux tabs.
 vim.opt.title = true
+vim.opt.titlestring = "%t"
 
 -- Clipboard (use system clipboard)
 -- On remote machines there is no clipboard provider (no X11/Wayland/pbcopy).
@@ -109,6 +111,25 @@ vim.keymap.set("n", "<leader>w", "<cmd>w<CR>", { desc = "Save file" })
 vim.keymap.set("n", "<leader>wq", "<cmd>wq<CR>", { desc = "Save and quit" })
 vim.keymap.set("n", "<leader>qq", "<cmd>q!<CR>", { desc = "Force quit" })
 
+-- Copy file path to system clipboard
+-- cp/cr/cf = copy path/relative/filename — covers all common paste contexts.
+-- Absolute for terminals/chat, relative for project references, filename for quick mention.
+vim.keymap.set("n", "<leader>cp", function()
+  local path = vim.fn.expand("%:p")
+  vim.fn.setreg("+", path)
+  vim.notify("Copied: " .. path)
+end, { desc = "Copy absolute path" })
+vim.keymap.set("n", "<leader>cr", function()
+  local path = vim.fn.expand("%")
+  vim.fn.setreg("+", path)
+  vim.notify("Copied: " .. path)
+end, { desc = "Copy relative path" })
+vim.keymap.set("n", "<leader>cf", function()
+  local name = vim.fn.expand("%:t")
+  vim.fn.setreg("+", name)
+  vim.notify("Copied: " .. name)
+end, { desc = "Copy filename" })
+
 -- =============================================================================
 -- CHEAT SHEET (floating window with custom overrides and leader bindings)
 -- =============================================================================
@@ -146,6 +167,10 @@ local function show_cheatsheet()
     "",
     "  <leader>mr   Toggle markdown render       ",
     "  <leader>mp   Toggle markdown preview      ",
+    "",
+    "  <leader>cp   Copy absolute file path       ",
+    "  <leader>cr   Copy relative file path       ",
+    "  <leader>cf   Copy filename only            ",
     "",
     "  <leader>cc   CLI tool cheat sheets        ",
     "",
@@ -265,7 +290,7 @@ require("lazy").setup({
       -- Label groups so the popup shows "+find", "+git", etc.
       wk.add({
         { "<leader>?", desc = "Show cheat sheet" },
-        { "<leader>c", group = "cheatsheets" },
+        { "<leader>c", group = "copy/cheatsheets" },
         { "<leader>f", group = "find" },
         { "<leader>g", group = "git" },
         { "<leader>m", group = "markdown" },
