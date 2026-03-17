@@ -11,6 +11,15 @@ Explore scripting tmux session layouts so a single command sets up a full worksp
 
 Start by identifying 1-2 layouts used repeatedly, then decide if a script or plugin fits better.
 
+## Resolve prefix mental model (2026-03-17)
+
+There are two ways tmux actions get triggered and it's causing split-brain:
+
+1. **Ctrl+Space** (tmux prefix) — press, release, then action key. This is the "real" prefix.
+2. **Cmd+Ctrl+key** (Ghostty keybinds) — Ghostty intercepts this and sends prefix + key to tmux automatically. Feels like a direct shortcut, not a prefix sequence.
+
+The question: should the muscle memory be built around Ctrl+Space (portable, works in any terminal) or Cmd+Ctrl (ergonomic, but Ghostty-only)? Pick one as primary and relegate the other to fallback, or it'll stay confusing.
+
 ## Known Issues
 
 ### Cmd+Shift+Arrow keys not working (2026-03-14)

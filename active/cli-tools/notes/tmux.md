@@ -36,14 +36,19 @@ feature — you can close your terminal and come back later.
 
 ```
 prefix + n                 new window              [custom, like Cmd+N]
-prefix + w                 close window (confirms)  [custom, like Cmd+W]
+prefix + w                 close window (no confirm) [custom, like Cmd+W]
 prefix + ,                 rename current window
 prefix + 1-9               jump to window by number
-prefix + p                 previous window
+prefix + H                 previous window          [custom, Shift+h]
+prefix + L                 next window              [custom, Shift+l]
+prefix + B                 move window left         [custom, swap position]
+prefix + N                 move window right        [custom, swap position]
 prefix + F                 find windows/sessions    [plugin, replaces default w]
 ```
 
 Windows show as tabs in the top bar. The active one is highlighted.
+`H`/`L` mirror the lowercase `h`/`l` pane nav — same keys, shifted = windows.
+`B`/`N` reorder the current window (back/next). Ghostty maps Cmd+Ctrl+B/N to these.
 
 ## Panes (splits within a window)
 
@@ -130,6 +135,8 @@ Custom bindings (from your tmux.conf):
   prefix + |               vertical split (instead of %)
   prefix + -               horizontal split (instead of ")
   prefix + h/j/k/l         vim-style pane navigation
+  prefix + H/L             previous/next window (Shift = window level)
+  prefix + B/N             move window left/right (reorder)
   prefix + r               reload config
   prefix + F               tmux-fzf (plugin, replaces default w picker)
 
