@@ -10,3 +10,9 @@ Explore scripting tmux session layouts so a single command sets up a full worksp
 - **tmux-resurrect / tmux-continuum**: plugins that save and restore sessions automatically
 
 Start by identifying 1-2 layouts used repeatedly, then decide if a script or plugin fits better.
+
+## Known Issues
+
+### Cmd+Shift+Arrow keys not working (2026-03-14)
+
+Cmd+Shift+Arrow key bindings aren't functioning as expected. Not a priority right now — parking this for a future session.

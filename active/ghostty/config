@@ -97,13 +97,26 @@ keybind = super+backslash=text:\x00|
 # Visual mnemonic: minus = horizontal line.
 keybind = super+-=text:\x00-
 
+# --- Window switching ---
+# Cmd+Opt+Left/Right: switch to previous/next window (tab).
+# Sends prefix + H/L (uppercase = window-level, lowercase = pane-level).
+# Why Cmd+Opt: Cmd+Arrow is macOS Mission Control. Cmd alone is tmux actions.
+# Cmd+Shift is reserved for Ghostty-native actions.
+keybind = super+alt+left=text:\x00H
+keybind = super+alt+right=text:\x00L
+
+# --- Window reordering ---
+# Cmd+Ctrl+B/N: swap current window left/right (B=back, N=next).
+# Closest analog to drag-and-drop tab reordering.
+keybind = super+ctrl+b=text:\x00B
+keybind = super+ctrl+n=text:\x00N
+
 # --- Pane navigation ---
-# Cmd+Opt+Arrow: move between panes. Sends prefix + hjkl (vim-style).
-# Why Cmd+Opt: Cmd+Arrow is used by macOS (Mission Control, Spaces).
-keybind = super+alt+left=text:\x00h
-keybind = super+alt+right=text:\x00l
-keybind = super+alt+up=text:\x00k
-keybind = super+alt+down=text:\x00j
+# Cmd+Ctrl+Arrow: move between panes. Sends prefix + hjkl (vim-style).
+keybind = super+ctrl+left=text:\x00h
+keybind = super+ctrl+right=text:\x00l
+keybind = super+ctrl+up=text:\x00k
+keybind = super+ctrl+down=text:\x00j
 
 # =============================================================================
 # MOUSE
