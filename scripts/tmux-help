@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+# Quick reference for custom tmux keybindings
+# Usage: tmux-help (standalone) or prefix + ? (from within tmux)
+
+cat <<'EOF'
+
+  tmux Cheat Sheet              prefix = Ctrl+Space
+  ─────────────────────────────────────────────────
+
+  SPLITS
+    prefix + |           Vertical split
+    prefix + -           Horizontal split
+
+  PANE NAVIGATION
+    prefix + h/j/k/l    Navigate panes (vim-style)
+    prefix + arrows      Navigate panes (default)
+
+  WINDOW MANAGEMENT
+    prefix + n           New window
+    prefix + w           Close window (no confirm)
+    prefix + H / L       Previous / next window
+    prefix + B / N       Move window left / right
+    prefix + 1-9         Jump to window by number
+    prefix + ,           Rename window
+
+  PLUGINS
+    prefix + I           Install plugins (tpm)
+    prefix + U           Update plugins (tpm)
+    prefix + F           tmux-fzf
+
+  OTHER
+    prefix + r           Reload config
+    prefix + ?           This help
+    prefix + d           Detach session
+    prefix + [           Copy mode (scroll/search)
+    prefix + z           Toggle pane zoom
+
+EOF
