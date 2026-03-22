@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+# clih — CLI cheat sheet viewer
+# Usage: clih           (pick from list with fzf + bat preview)
+#        clih <tool>    (jump straight to a tool, e.g. clih bat, clih tmux)
+#
+# Reads markdown cheat sheets from active/cli-tools/notes/
+# Uses fzf for selection and bat for rendering.
+
+SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "$0" 2>/dev/null || realpath "$0")")" && pwd)"
+CHEATSHEET_DIR="$(dirname "$SCRIPT_DIR")/active/cli-tools/notes"
+
+if [ ! -d "$CHEATSHEET_DIR" ]; then
+  echo "Cheat sheets not found at: $CHEATSHEET_DIR"
+  exit 1
+fi
+
+if [ -n "$1" ]; then
+  # Direct access: clih bat, clih tmux, etc.
+  file="$CHEATSHEET_DIR/$1.md"
+  if [ -f "$file" ]; then
+    bat --style=plain --paging=always "$file"
+  else
+    echo "No cheat sheet for '$1'"
+    echo "Available: $(ls "$CHEATSHEET_DIR"/*.md 2>/dev/null | xargs -n1 basename | sed 's/\.md$//' | tr '\n' ' ')"
+    exit 1
+  fi
+else
+  # Interactive picker with fzf + bat preview
+  selected=$(ls "$CHEATSHEET_DIR"/*.md 2>/dev/null | \
+    xargs -n1 basename | \
+    sed 's/\.md$//' | \
+    fzf --prompt="cheat sheet > " \
+        --preview="bat --style=plain --color=always \"$CHEATSHEET_DIR/{}.md\"" \
+        --preview-window=right:70%)
+
+  if [ -n "$selected" ]; then
+    bat --style=plain --paging=always "$CHEATSHEET_DIR/$selected.md"
+  fi
+fi

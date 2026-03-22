@@ -1,6 +1,7 @@
 # toolbox setup
 # Usage: make setup         (full install from scratch — macOS with brew)
 #        make setup-remote  (remote Linux — no brew, no sudo, no npm)
+#        make refresh       (re-symlink + reload configs — won't kill tmux)
 #        make link          (symlink configs only)
 #        make brew          (install packages only)
 #        make status        (show what's installed and linked)
@@ -32,7 +33,7 @@ CURSOR_USER_DIR := $(HOME)/Library/Application Support/Cursor/User
 
 # ─── Targets ──────────────────────────────────────────────────────────────────
 
-.PHONY: setup setup-remote install-cli-tools force-install-cli-tools brew link link-macos link-cursor nvim-plugins tmux-plugins configure-cli-tools cursor-extensions cursor-extensions-install status clean help
+.PHONY: setup setup-remote refresh install-cli-tools force-install-cli-tools brew link link-macos link-cursor nvim-plugins tmux-plugins configure-cli-tools cursor-extensions cursor-extensions-install status clean help
 
 ## Full setup from scratch (macOS)
 setup: install-cli-tools brew link link-macos link-cursor nvim-plugins tmux-plugins configure-cli-tools
@@ -75,6 +76,25 @@ setup-remote: install-cli-tools link nvim-plugins tmux-plugins configure-cli-too
 	@echo "Prerequisites (install via system package manager if missing):"
 	@echo "  - tmux: sudo apt install tmux  (or yum/dnf equivalent)"
 	@echo "  - git:  sudo apt install git   (needed for TPM plugin install)"
+
+## Refresh configs without reinstalling (won't kill tmux sessions)
+refresh: link
+	@# macOS-only: re-symlink Ghostty and Cursor configs
+	@if [ "$$(uname)" = "Darwin" ]; then \
+		$(MAKE) link-macos link-cursor; \
+	fi
+	@echo "── Syncing nvim plugins ──"
+	@nvim --headless "+Lazy! sync" +qa 2>/dev/null || true
+	@echo "  done"
+	@echo "── Reloading tmux config ──"
+	@if tmux list-sessions >/dev/null 2>&1; then \
+		tmux source-file $(HOME)/.tmux.conf; \
+		echo "  tmux config reloaded (sessions preserved)"; \
+	else \
+		echo "  no tmux server running, skipping reload"; \
+	fi
+	@echo ""
+	@echo "✅ Refresh complete! (sessions untouched)"
 
 ## Install CLI tools from GitHub releases to ~/.local/bin
 install-cli-tools:
